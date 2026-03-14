@@ -29,9 +29,7 @@ class Immobilienscout(Crawler):
 
 
     def get_immoscout_query(self, search_url: str) -> ImmoscoutQuery:
-        """Builds an Immoscout query from a web interface URL,
-        transforms and validates parameters.
-        """
+        """Builds an Immoscout query from a web interface URL, transforms and validates parameters."""
         parsed_url = urlparse(search_url)
         path_elements = parsed_url.path.split("/")
 
@@ -39,6 +37,8 @@ class Immobilienscout(Crawler):
         geocodes = None
         if "radius" in path_elements:
             search_type = "radius"
+        elif "shape" in path_elements:
+            raise Exception("Shape type is not supported")
         else:
             search_type = "region"
             geocodes = "/".join(path_elements[2:])
@@ -55,18 +55,20 @@ class Immobilienscout(Crawler):
                 "exclusioncriteria",
                 "heatingtypes",
                 "petsallowedtypes",
+                "geocodes",
             ):
                 query_params[k] = query_params[k][0]
         return ImmoscoutQuery(
             realestatetype=real_estate_type, # type: ignore
             searchtype=search_type,
-            geocodes=geocodes,
+            # geocodes=geocodes,
             # set pagesize to result limit to minimize number of API requests
             pagesize=self.RESULT_LIMIT,
             **query_params, # type: ignore
         )
 
-    def compose_api_url(self, query: ImmoscoutQuery) -> str:
+    @staticmethod
+    def compose_api_url(query: ImmoscoutQuery) -> str:
         """Constructs a mobile API URL from an Immoscout query."""
         api_url = "https://api.mobile.immobilienscout24.de/search/list?"
         query_dict = query.model_dump(exclude_none=True)

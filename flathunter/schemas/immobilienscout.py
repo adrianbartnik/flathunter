@@ -27,6 +27,7 @@ class ImmoscoutQuery(BaseModel):
         # Category "Balkon/Terrasse"
         "wohnung-mit-balkon-mieten": { "equipment": ["balcony"] },
         "wohnung-mit-garten-mieten": { "equipment": ["garden"] },
+
         # Category "Wohnungstyp"
         "souterrainwohnung-mieten": { "apartmenttypes": ["halfbasement"] },
         "erdgeschosswohnung-mieten": { "apartmenttypes": ["groundfloor"] },
@@ -37,10 +38,12 @@ class ImmoscoutQuery(BaseModel):
         "terrassenwohnung-mieten": { "apartmenttypes": ["terracedflat"] },
         "penthouse-mieten": { "apartmenttypes": ["penthouse"] },
         "dachgeschosswohnung-mieten": { "apartmenttypes": ["roofstorey"] },
+
         # Category "Ausstattung"
         "wohnung-mit-garage-mieten": { "equipment": ["parking"] },
         "wohnung-mit-einbaukueche-mieten": { "equipment": ["builtinkitchen"] },
         "wohnung-mit-keller-mieten": { "equipment": ["cellar"] },
+
         # Category "Merkmale"
         "neubauwohnung-mieten": { "newbuilding": "true" },
         "barrierefreie-wohnung-mieten": { "equipment": ["handicappedaccessible"] },
@@ -64,7 +67,7 @@ class ImmoscoutQuery(BaseModel):
     equipment: list[str] | None = Field(title="Ausstattung", default=None)
     exclusioncriteria: list[str] | None = Field(title="Objektart", default=None)
     floor: str | None = Field(title="Etage", default=None)
-    geocodes: str | None = Field(
+    geocodes: list[str] | None = Field(
         description="Path following '/Suche/' up to second to last element", default=None,
     )
     geocoordinates: str | None = Field(
@@ -138,10 +141,7 @@ class ImmoscoutQuery(BaseModel):
             )
             return "-firstactivation"
 
-    @field_serializer(
-        "haspromotion",
-        "newbuilding",
-    )
+    @field_serializer("haspromotion", "newbuilding")
     @classmethod
     def serialize_booleans(cls, value: bool) -> str:
         """Converts Python-type booleans to JSON equivalents."""
