@@ -11,13 +11,8 @@ from flathunter.captcha.imagetyperz_solver import ImageTyperzSolver
 from flathunter.captcha.twocaptcha_solver import TwoCaptchaSolver
 from flathunter.captcha.capmonster_solver import CapmonsterSolver
 from flathunter.crawler.kleinanzeigen import Kleinanzeigen
-from flathunter.crawler.idealista import Idealista
-from flathunter.crawler.immobiliare import Immobiliare
 from flathunter.crawler.immobilienscout import Immobilienscout
 from flathunter.crawler.immowelt import Immowelt
-from flathunter.crawler.wggesucht import WgGesucht
-from flathunter.crawler.vrmimmo import VrmImmo
-from flathunter.crawler.subito import Subito
 from flathunter.filter import Filter
 from flathunter.logging import logger
 from flathunter.exceptions import ConfigException
@@ -141,13 +136,8 @@ Preis: {price}
         """Initialize search plugins"""
         self.__searchers__ = [
             Immobilienscout(self),
-            WgGesucht(self),
             Kleinanzeigen(self),
             Immowelt(self),
-            Subito(self),
-            Immobiliare(self),
-            Idealista(self),
-            VrmImmo(self)
         ]
 
     def check_deprecated(self):

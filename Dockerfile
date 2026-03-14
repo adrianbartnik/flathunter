@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.12-slim-trixie
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -6,20 +6,17 @@ ARG PIP_NO_CACHE_DIR=1
 
 # Install Chromium
 RUN apt-get -y update
-RUN apt-get install -y chromium
+RUN apt-get install -y chromium git
 
-# Upgrade pip, install pipenv
-RUN pip install --upgrade pip
-RUN pip install pipenv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /usr/src/app
 
-# Copy files that list dependencies
-COPY Pipfile.lock Pipfile ./
+# Copy only dependency files first
+COPY pyproject.toml uv.lock ./
 
-# Generate requirements.txt and install dependencies from there
-RUN pipenv requirements > requirements.txt
-RUN pip install -r requirements.txt
+# Install dependencies
+RUN uv sync --frozen --no-dev
 
 # Copy all other files, including source files
 COPY . .

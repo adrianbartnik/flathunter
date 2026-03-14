@@ -1,0 +1,77 @@
+[project]
+name = "flathunter"
+version = "0.0.1"
+requires-python = ">= 3.11"
+dependencies = [
+    "PyYAML",
+    "requests",
+    "urllib3",
+    "lxml",
+    "coverage",
+    "requests-mock",
+    "Flask>=3",
+    "werkzeug",
+    "mock-firestore",
+    "pytest-mock",
+    "pytest",
+    "requests-random-user-agent",
+    "jsonpath-ng",
+    "backoff",
+    "pytz",
+    "beautifulsoup4",
+    "webdriver-manager",
+    "python-dotenv",
+    "undetected-chromedriver",
+    "prompt-toolkit",
+    "ruamel.yaml",
+    "pyright",
+    "types-beautifulsoup4==4.12.0.20241020",
+    "selenium==4.27.1",
+    "gunicorn==23.0.0",
+    "flask-api",
+    "setuptools",
+    "certifi",
+    "jinja2",
+    "cryptography",
+    "pydantic",
+]
+
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "exceptiongroup",
+    "ruff>=0.15.6",
+]
+
+[tool.uv]
+package = false
+default-groups = "all"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+
+[tool.uv.sources]
+flask-api = { git = "git+https://github.com/flask-api/flask-api.git", rev = "develop" }
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.ruff]
+select = ["ALL"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+exclude = [
+    ".git",
+    ".idea",
+    ".mypy_cache",
+    ".venv"
+]
+target-version = "py313"

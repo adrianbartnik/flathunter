@@ -6,7 +6,7 @@ from flathunter.default_processors import AddressResolver
 from flathunter.default_processors import Filter
 from flathunter.default_processors import LambdaProcessor
 from flathunter.default_processors import CrawlExposeDetails
-from flathunter.notifiers import SenderMattermost, SenderTelegram, SenderApprise, SenderSlack
+from flathunter.notifiers import SenderTelegram, SenderSlack
 from flathunter.gmaps_duration_processor import GMapsDurationProcessor
 from flathunter.idmaintainer import SaveAllExposesProcessor
 from flathunter.abstract_processor import Processor
@@ -24,10 +24,6 @@ class ProcessorChainBuilder:
         notifiers = self.config.notifiers()
         if 'telegram' in notifiers:
             self.processors.append(SenderTelegram(self.config, receivers=receivers))
-        if 'mattermost' in notifiers:
-            self.processors.append(SenderMattermost(self.config))
-        if 'apprise' in notifiers:
-            self.processors.append(SenderApprise(self.config))
         if 'slack' in notifiers:
             self.processors.append(SenderSlack(self.config))
         return self

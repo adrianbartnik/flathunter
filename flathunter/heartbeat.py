@@ -2,7 +2,7 @@
 from flathunter.abstract_notifier import Notifier
 from flathunter.config import YamlConfig
 from flathunter.logging import logger
-from flathunter.notifiers import SenderApprise, SenderMattermost, SenderTelegram, SenderSlack
+from flathunter.notifiers import SenderTelegram, SenderSlack
 from flathunter.exceptions import HeartbeatException
 
 
@@ -28,12 +28,8 @@ class Heartbeat:
     def __init__(self, config: YamlConfig, interval: str):
         notifiers = config.notifiers()
 
-        if 'mattermost' in notifiers:
-            self.notifier = SenderMattermost(config)
-        elif 'telegram' in notifiers:
+        if 'telegram' in notifiers:
             self.notifier = SenderTelegram(config)
-        elif 'apprise' in notifiers:
-            self.notifier = SenderApprise(config)
         elif 'slack' in notifiers:
             self.notifier = SenderSlack(config)
         else:
