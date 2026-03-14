@@ -1,19 +1,22 @@
 """Utility classes for building chains for processors"""
 from functools import reduce
-from typing import List
 
-from flathunter.default_processors import AddressResolver
-from flathunter.default_processors import Filter
-from flathunter.default_processors import LambdaProcessor
-from flathunter.default_processors import CrawlExposeDetails
-from flathunter.notifiers import SenderTelegram, SenderSlack
+from flathunter.abstract_processor import Processor
+from flathunter.default_processors import (
+    AddressResolver,
+    CrawlExposeDetails,
+    Filter,
+    LambdaProcessor,
+)
 from flathunter.gmaps_duration_processor import GMapsDurationProcessor
 from flathunter.idmaintainer import SaveAllExposesProcessor
-from flathunter.abstract_processor import Processor
+from flathunter.notifiers import SenderSlack, SenderTelegram
+
 
 class ProcessorChainBuilder:
     """Builder pattern for building chains of processors"""
-    processors: List[Processor]
+
+    processors: list[Processor]
 
     def __init__(self, config):
         self.processors = []
@@ -22,9 +25,9 @@ class ProcessorChainBuilder:
     def send_messages(self, receivers=None):
         """Add processor that sends messages for exposes"""
         notifiers = self.config.notifiers()
-        if 'telegram' in notifiers:
+        if "telegram" in notifiers:
             self.processors.append(SenderTelegram(self.config, receivers=receivers))
-        if 'slack' in notifiers:
+        if "slack" in notifiers:
             self.processors.append(SenderSlack(self.config))
         return self
 
@@ -67,7 +70,8 @@ class ProcessorChainBuilder:
 
 class ProcessorChain:
     """Class to hold a chain of processors"""
-    processors: List[Processor]
+
+    processors: list[Processor]
 
     def __init__(self, processors):
         self.processors = processors

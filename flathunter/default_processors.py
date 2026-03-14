@@ -1,9 +1,11 @@
 """Built-in expose processor implementations. Used by the processor pipelines
-   in flathunter and in the webservice"""
+in flathunter and in the webservice
+"""
 import re
 
-from flathunter.logging import logger
 from flathunter.abstract_processor import Processor
+from flathunter.logging import logger
+
 
 class Filter(Processor):
     """Filter processor implementation. Applies a filter to the list of exposes"""
@@ -23,12 +25,12 @@ class AddressResolver(Processor):
 
     def process_expose(self, expose):
         """Fetches the expose from the expose URL and extracts the address"""
-        if expose['address'].startswith('http'):
-            url = expose['address']
+        if expose["address"].startswith("http"):
+            url = expose["address"]
             for searcher in self.config.searchers():
                 if re.search(searcher.URL_PATTERN, url):
-                    expose['address'] = searcher.load_address(url)
-                    logger.debug("Loaded address %s for url %s", expose['address'], url)
+                    expose["address"] = searcher.load_address(url)
+                    logger.debug("Loaded address %s for url %s", expose["address"], url)
                     break
         return expose
 
@@ -41,7 +43,7 @@ class CrawlExposeDetails(Processor):
     def process_expose(self, expose):
         """Fetches the page at exposes['url'] and extracts additional details from it"""
         for searcher in self.config.searchers():
-            if re.search(searcher.URL_PATTERN, expose['url']):
+            if re.search(searcher.URL_PATTERN, expose["url"]):
                 expose = searcher.get_expose_details(expose)
         return expose
 

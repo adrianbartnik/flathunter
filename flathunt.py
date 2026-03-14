@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Flathunter - search for flats by crawling property portals, and receive telegram
-   messages about them. This is the main command-line executable, for running on the
-   console. To run as a webservice, look at main.py"""
+messages about them. This is the main command-line executable, for running on the
+console. To run as a webservice, look at main.py
+"""
 
 import time
 from datetime import time as dtime
 
 from flathunter.argument_parser import parse
-from flathunter.logging import logger, configure_logging
-from flathunter.idmaintainer import IdMaintainer
-from flathunter.hunter import Hunter
 from flathunter.config import Config
 from flathunter.heartbeat import Heartbeat
+from flathunter.hunter import Hunter
+from flathunter.idmaintainer import IdMaintainer
+from flathunter.logging import configure_logging, logger
 from flathunter.time_utils import get_random_time_jitter, wait_during_period
 
 __author__ = "Jan Harrie"
@@ -24,7 +24,7 @@ __status__ = "Production"
 
 def launch_flat_hunt(config, heartbeat: Heartbeat):
     """Starts the crawler / notification loop"""
-    id_watch = IdMaintainer(f'{config.database_location()}/processed_ids.db')
+    id_watch = IdMaintainer(f"{config.database_location()}/processed_ids.db")
 
     time_from = dtime.fromisoformat(config.loop_pause_from())
     time_till = dtime.fromisoformat(config.loop_pause_till())
@@ -66,23 +66,23 @@ def main():
 
     # check config
     notifiers = config.notifiers()
-    if 'mattermost' in notifiers \
+    if "mattermost" in notifiers \
             and not config.mattermost_webhook_url():
         logger.error("No Mattermost webhook configured. Starting like this would be pointless...")
         return
-    if 'telegram' in notifiers:
+    if "telegram" in notifiers:
         if not config.telegram_bot_token():
             logger.error(
-                "No Telegram bot token configured. Starting like this would be pointless..."
+                "No Telegram bot token configured. Starting like this would be pointless...",
             )
             return
         if len(config.telegram_receiver_ids()) == 0:
             logger.warning("No Telegram receivers configured - nobody will get notifications.")
-    if 'apprise' in notifiers \
-            and not config.get('apprise', {}):
+    if "apprise" in notifiers \
+            and not config.get("apprise", {}):
         logger.error("No apprise url configured. Starting like this would be pointless...")
         return
-    if 'slack' in notifiers \
+    if "slack" in notifiers \
             and not config.slack_webhook_url():
         logger.error("No Slack webhook url configured. Starting like this would be pointless...")
         return

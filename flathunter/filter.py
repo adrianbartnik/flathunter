@@ -1,8 +1,8 @@
 """Module with implementations of standard expose filters"""
-from functools import reduce
 import re
 from abc import ABC, ABCMeta
-from typing import List, Any
+from functools import reduce
+from typing import Any
 
 
 class AbstractFilter(ABC):
@@ -19,7 +19,7 @@ class ExposeHelper:
     @staticmethod
     def get_price(expose):
         """Extracts the price from a price text"""
-        price_match = re.search(r'\d+([\.,]\d+)?', expose['price'])
+        price_match = re.search(r"\d+([\.,]\d+)?", expose["price"])
         if price_match is None:
             return None
         return float(price_match[0].replace(".", "").replace(",", "."))
@@ -27,7 +27,7 @@ class ExposeHelper:
     @staticmethod
     def get_size(expose):
         """Extracts the size from a size text"""
-        size_match = re.search(r'\d+([\.,]\d+)?', expose['size'])
+        size_match = re.search(r"\d+([\.,]\d+)?", expose["size"])
         if size_match is None:
             return None
         return float(size_match[0].replace(",", "."))
@@ -35,7 +35,7 @@ class ExposeHelper:
     @staticmethod
     def get_rooms(expose):
         """Extracts the number of rooms from a room text"""
-        rooms_match = re.search(r'\d+([\.,]\d+)?', expose['rooms'])
+        rooms_match = re.search(r"\d+([\.,]\d+)?", expose["rooms"])
         if rooms_match is None:
             return None
         return float(rooms_match[0].replace(",", "."))
@@ -49,8 +49,8 @@ class AlreadySeenFilter(AbstractFilter):
 
     def is_interesting(self, expose):
         """Returns true if an expose should be kept in the pipeline"""
-        if not self.id_watch.is_processed(expose['id']):
-            self.id_watch.mark_processed(expose['id'])
+        if not self.id_watch.is_processed(expose["id"]):
+            self.id_watch.mark_processed(expose["id"])
             return True
         return False
 
@@ -149,7 +149,7 @@ class TitleFilter(AbstractFilter):
         """True unless title matches the filtered titles"""
         combined_excludes = "(" + ")|(".join(self.filtered_titles) + ")"
         found_objects = re.search(
-            combined_excludes, expose['title'], re.IGNORECASE)
+            combined_excludes, expose["title"], re.IGNORECASE)
         # send all non matching regex patterns
         if not found_objects:
             return True
@@ -174,7 +174,8 @@ class PPSFilter(AbstractFilter):
 
 class FilterBuilder:
     """Construct a filter chain"""
-    filters: List[AbstractFilter]
+
+    filters: list[AbstractFilter]
 
     def __init__(self):
         self.filters = []
@@ -211,9 +212,9 @@ class FilterBuilder:
 class Filter:
     """Abstract filter object"""
 
-    filters: List[AbstractFilter]
+    filters: list[AbstractFilter]
 
-    def __init__(self, filters: List[AbstractFilter]):
+    def __init__(self, filters: list[AbstractFilter]):
         self.filters = filters
 
     def is_interesting_expose(self, expose):

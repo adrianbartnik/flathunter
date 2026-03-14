@@ -8,7 +8,7 @@ urls:
   - https://www.kleinanzeigen.de/s-wohnung-mieten/muenchen/anbieter:privat/anzeige:angebote/preis:600:1000
     """
 
-TEST_URL = 'https://www.kleinanzeigen.de/s-wohnung-mieten/berlin/preis:1000:1500/c203l3331+wohnung_mieten.qm_d:70,+wohnung_mieten.zimmer_d:2'
+TEST_URL = "https://www.kleinanzeigen.de/s-wohnung-mieten/berlin/preis:1000:1500/c203l3331+wohnung_mieten.qm_d:70,+wohnung_mieten.zimmer_d:2"
 
 @pytest.fixture
 def crawler():
@@ -20,9 +20,9 @@ def test_crawler(crawler):
     entries = crawler.extract_data(soup)
     assert entries is not None
     assert len(entries) > 0
-    assert entries[0]['id'] > 0
-    assert entries[0]['url'].startswith("https://www.kleinanzeigen.de/s-anzeige")
-    for attr in [ 'title', 'price', 'size', 'rooms', 'address' ]:
+    assert entries[0]["id"] > 0
+    assert entries[0]["url"].startswith("https://www.kleinanzeigen.de/s-anzeige")
+    for attr in [ "title", "price", "size", "rooms", "address" ]:
         assert entries[0][attr]
 
 def test_process_expose_fetches_details(crawler):
@@ -34,5 +34,5 @@ def test_process_expose_fetches_details(crawler):
     updated_entries = [ crawler.get_expose_details(expose) for expose in entries ]
     for expose in updated_entries:
         print(expose)
-        for attr in [ 'title', 'price', 'size', 'rooms', 'address', 'from' ]:
+        for attr in [ "title", "price", "size", "rooms", "address", "from" ]:
             assert expose[attr]

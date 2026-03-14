@@ -1,17 +1,18 @@
 """Expose crawler for ImmoWelt"""
-import re
 import datetime
 import hashlib
+import re
 
 from bs4 import BeautifulSoup, Tag
 
-from flathunter.logging import logger
 from flathunter.abstract_crawler import Crawler
+from flathunter.logging import logger
+
 
 class Immowelt(Crawler):
     """Implementation of Crawler interface for ImmoWelt"""
 
-    URL_PATTERN = re.compile(r'https://www\.immowelt\.de')
+    URL_PATTERN = re.compile(r"https://www\.immowelt\.de")
 
     def __init__(self, config):
         super().__init__(config)
@@ -19,9 +20,9 @@ class Immowelt(Crawler):
 
     def get_expose_details(self, expose):
         """Loads additional details for an expose by processing the expose detail URL"""
-        soup = self.get_page(expose['url'])
+        soup = self.get_page(expose["url"])
         date = datetime.datetime.now().strftime("%2d.%2m.%Y")
-        expose['from'] = date
+        expose["from"] = date
 
         immo_div = soup.find("app-estate-object-informations")
         if not isinstance(immo_div, Tag):
@@ -35,14 +36,14 @@ class Immowelt(Crawler):
             if detail.text.strip() == "Bezug":
                 date = detail.findNext("p").text.strip()
                 no_exact_date_given = re.match(
-                    r'.*sofort.*|.*Nach Vereinbarung.*',
+                    r".*sofort.*|.*Nach Vereinbarung.*",
                     date,
-                    re.MULTILINE|re.DOTALL|re.IGNORECASE
+                    re.MULTILINE|re.DOTALL|re.IGNORECASE,
                 )
                 if no_exact_date_given:
                     date = datetime.datetime.now().strftime("%2d.%2m.%Y")
                 break
-        expose['from'] = date
+        expose["from"] = date
         return expose
 
     # pylint: disable=too-many-locals
@@ -100,31 +101,31 @@ class Immowelt(Crawler):
             picture = adv.find("img")
             image = None
             if picture:
-                image = picture.get('src')
+                image = picture.get("src")
 
             try:
                 address = adv.find(
-                    "div", attrs={"data-testid": "cardmfe-description-box-address"}
+                    "div", attrs={"data-testid": "cardmfe-description-box-address"},
                   ).text
             except AttributeError:
                 address = ""
-            ad_id = url.split('/')[-1]
+            ad_id = url.split("/")[-1]
             processed_id = int(
-              hashlib.sha256(ad_id.encode('utf-8')).hexdigest(), 16
+              hashlib.sha256(ad_id.encode("utf-8")).hexdigest(), 16,
             ) % 10**16
 
             details = {
-                'id': processed_id,
-                'image': image,
-                'url': url,
-                'title': title.strip(),
-                'rooms': rooms,
-                'price': price,
-                'size': size,
-                'address': address,
-                'crawler': self.get_name()
+                "id": processed_id,
+                "image": image,
+                "url": url,
+                "title": title.strip(),
+                "rooms": rooms,
+                "price": price,
+                "size": size,
+                "address": address,
+                "crawler": self.get_name(),
             }
             entries.append(details)
 
-        logger.debug('Number of entries found: %d', len(entries))
+        logger.debug("Number of entries found: %d", len(entries))
         return entries

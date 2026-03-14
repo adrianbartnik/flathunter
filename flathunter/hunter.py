@@ -1,14 +1,16 @@
 """Default Flathunter implementation for the command line"""
 import traceback
 from itertools import chain
+
 import requests
 
-from flathunter.logging import logger
-from flathunter.config import YamlConfig
-from flathunter.filter import Filter
-from flathunter.processor import ProcessorChain
 from flathunter.captcha.captcha_solver import CaptchaUnsolvableError
+from flathunter.config import YamlConfig
 from flathunter.exceptions import ConfigException
+from flathunter.filter import Filter
+from flathunter.logging import logger
+from flathunter.processor import ProcessorChain
+
 
 class Hunter:
     """Basic methods for crawling and processing / filtering exposes"""
@@ -54,7 +56,7 @@ class Hunter:
         result = []
         # We need to iterate over this list to force the evaluation of the pipeline
         for expose in processor_chain.process(self.crawl_for_exposes(max_pages)):
-            logger.info('New offer: %s', expose['title'])
+            logger.info("New offer: %s", expose["title"])
             result.append(expose)
 
         return result

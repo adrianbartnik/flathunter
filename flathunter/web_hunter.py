@@ -1,15 +1,17 @@
 """Flathunter implementation for website"""
 from flathunter.config import YamlConfig
-from flathunter.logging import logger
-from flathunter.hunter import Hunter
-from flathunter.filter import Filter
-from flathunter.processor import ProcessorChain
 from flathunter.exceptions import BotBlockedException, UserDeactivatedException
+from flathunter.filter import Filter
+from flathunter.hunter import Hunter
+from flathunter.logging import logger
+from flathunter.processor import ProcessorChain
+
 
 class WebHunter(Hunter):
     """Flathunter implementation for website. Designed to hunt all exposes from
-       all sites and save them to the database. Includes support for multiple users
-       with individual filters implemented in-app"""
+    all sites and save them to the database. Includes support for multiple users
+    with individual filters implemented in-app
+    """
 
     def hunt_flats(self, max_pages=1):
         """Crawl all URLs, and send notifications to users of new flats"""
@@ -32,7 +34,7 @@ class WebHunter(Hunter):
             new_exposes.append(expose)
 
         for (user_id, settings) in self.id_watch.get_user_settings():
-            if 'mute_notifications' in settings:
+            if "mute_notifications" in settings:
                 continue
             filter_set = Filter.builder().read_config(YamlConfig(settings)).build()
             try:
@@ -41,7 +43,7 @@ class WebHunter(Hunter):
                                                 .send_messages([user_id]) \
                                                 .build()
                 for message in processor_chain.process(new_exposes):
-                    logger.debug("Sent expose %d to user %d", message['id'], user_id)
+                    logger.debug("Sent expose %d to user %d", message["id"], user_id)
             except BotBlockedException:
                 logger.warning("Bot has been blocked by user %d - updating settings", user_id)
                 settings["mute_notifications"] = True
@@ -72,7 +74,7 @@ class WebHunter(Hunter):
         settings = self.id_watch.get_settings_for_user(user_id)
         if settings is None:
             settings = {}
-        settings['filters'] = filters
+        settings["filters"] = filters
         self.id_watch.save_settings_for_user(user_id, settings)
 
     def get_filters_for_user(self, user_id):
@@ -80,8 +82,8 @@ class WebHunter(Hunter):
         settings = self.id_watch.get_settings_for_user(user_id)
         if settings is None:
             return None
-        if 'filters' in settings:
-            return settings['filters']
+        if "filters" in settings:
+            return settings["filters"]
         return None
 
     def set_notification_status(self, user_id, receives_notifications):
@@ -91,10 +93,10 @@ class WebHunter(Hunter):
             if receives_notifications:
                 return
             settings = {}
-        if 'mute_notifications' in settings and receives_notifications:
-            del settings['mute_notifications']
-        if 'mute_notifications' not in settings and not receives_notifications:
-            settings['mute_notifications'] = True
+        if "mute_notifications" in settings and receives_notifications:
+            del settings["mute_notifications"]
+        if "mute_notifications" not in settings and not receives_notifications:
+            settings["mute_notifications"] = True
         self.id_watch.save_settings_for_user(user_id, settings)
 
     def toggle_notification_status(self, user_id):
@@ -108,4 +110,4 @@ class WebHunter(Hunter):
         settings = self.id_watch.get_settings_for_user(user_id)
         if settings is None:
             return False
-        return 'mute_notifications' in settings
+        return "mute_notifications" in settings

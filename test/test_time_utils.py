@@ -1,9 +1,13 @@
 import unittest
-from unittest.mock import patch
-from datetime import time
 from datetime import datetime as dt
+from datetime import time
+from unittest.mock import patch
 
-from flathunter.time_utils import is_current_time_between, get_time_span_in_secs, wait_during_period
+from flathunter.time_utils import (
+    get_time_span_in_secs,
+    is_current_time_between,
+    wait_during_period,
+)
 
 
 class TimeUtilsTest(unittest.TestCase):

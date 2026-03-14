@@ -1,7 +1,7 @@
 """Utilities for dealing with times."""
-from time import sleep
 from datetime import datetime
 from random import randint
+from time import sleep
 
 from flathunter.logging import logger
 

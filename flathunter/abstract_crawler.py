@@ -1,17 +1,15 @@
 """Interface for webcrawlers. Crawler implementations should subclass this"""
-from abc import ABC
-import re
-from time import sleep
-from typing import Optional, Any
 import json
+import re
+from abc import ABC
+from time import sleep
+from typing import Any
 
 import backoff
 import requests
+
 # pylint: disable=unused-import
-import requests_random_user_agent
-
 from bs4 import BeautifulSoup
-
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
@@ -20,8 +18,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from flathunter import proxies
 from flathunter.captcha.captcha_solver import CaptchaUnsolvableError
-from flathunter.logging import logger
 from flathunter.exceptions import ProxyException
+from flathunter.logging import logger
 
 
 class Crawler(ABC):
@@ -30,18 +28,18 @@ class Crawler(ABC):
     URL_PATTERN: re.Pattern
 
     HEADERS = {
-        'Connection': 'keep-alive',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-cache',
-        'Upgrade-Insecure-Requests': '1',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;'
-                  'q=0.9,image/webp,image/apng,*/*;q=0.8,'
-                  'application/signed-exchange;v=b3;q=0.9',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-User': '?1',
-        'Sec-Fetch-Dest': 'document',
-        'Accept-Language': 'en-US,en;q=0.9',
+        "Connection": "keep-alive",
+        "Pragma": "no-cache",
+        "Cache-Control": "no-cache",
+        "Upgrade-Insecure-Requests": "1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;"
+                  "q=0.9,image/webp,image/apng,*/*;q=0.8,"
+                  "application/signed-exchange;v=b3;q=0.9",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-User": "?1",
+        "Sec-Fetch-Dest": "document",
+        "Accept-Language": "en-US,en;q=0.9",
     }
 
     def __init__(self, config):
@@ -60,11 +58,10 @@ class Crawler(ABC):
     def get_soup_from_url(
             self,
             url: str,
-            driver: Optional[Any] = None,
+            driver: Any | None = None,
             checkbox: bool = False,
-            afterlogin_string: Optional[str] = None) -> BeautifulSoup:
+            afterlogin_string: str | None = None) -> BeautifulSoup:
         """Creates a Soup object from the HTML at the provided URL"""
-
         if self.config.use_proxy():
             return self.get_soup_with_proxy(url)
         if driver is not None:
@@ -76,17 +73,17 @@ class Crawler(ABC):
             elif re.search("g-recaptcha", driver.page_source):
                 self.resolve_recaptcha(
                     driver, checkbox, afterlogin_string or "")
-            return BeautifulSoup(driver.page_source, 'lxml')
+            return BeautifulSoup(driver.page_source, "lxml")
 
         resp = requests.get(url, headers=self.HEADERS, timeout=30)
         if resp.status_code not in (200, 405):
-            user_agent = 'Unknown'
-            if 'User-Agent' in self.HEADERS:
-                user_agent = self.HEADERS['User-Agent']
+            user_agent = "Unknown"
+            if "User-Agent" in self.HEADERS:
+                user_agent = self.HEADERS["User-Agent"]
             logger.error("Got response (%i): %s\n%s",
                          resp.status_code, resp.content, user_agent)
 
-        return BeautifulSoup(resp.content, 'lxml')
+        return BeautifulSoup(resp.content, "lxml")
 
     def get_soup_with_proxy(self, url) -> BeautifulSoup:
         """Will try proxies until it's possible to crawl and return a soup"""
@@ -103,7 +100,7 @@ class Crawler(ABC):
                         url,
                         headers=self.HEADERS,
                         proxies={"http": proxy, "https": proxy},
-                        timeout=(20, 0.1)
+                        timeout=(20, 0.1),
                     )
 
                     if resp.status_code != 200:
@@ -118,7 +115,7 @@ class Crawler(ABC):
                         "Connection failed for proxy %s. Trying new proxy...", proxy)
                 except requests.exceptions.Timeout:
                     logger.error(
-                        "Connection timed out for proxy %s. Trying new proxy...", proxy
+                        "Connection timed out for proxy %s. Trying new proxy...", proxy,
                     )
                 except requests.exceptions.RequestException:
                     logger.error("Some error occurred. Trying new proxy...")
@@ -127,7 +124,7 @@ class Crawler(ABC):
             raise ProxyException(
                 "An error occurred while fetching proxies or content")
 
-        return BeautifulSoup(resp.content, 'lxml')
+        return BeautifulSoup(resp.content, "lxml")
 
     def extract_data(self, raw_data):
         """Should be implemented in subclass"""
@@ -143,7 +140,7 @@ class Crawler(ABC):
 
         # get data from first page
         entries = self.extract_data(soup)
-        logger.debug('Number of found entries: %d', len(entries))
+        logger.debug("Number of found entries: %d", len(entries))
 
         return entries
 
@@ -154,7 +151,7 @@ class Crawler(ABC):
                 return self.get_results(url, max_pages)
             except requests.exceptions.ConnectionError:
                 logger.warning(
-                    "Connection to %s failed. Retrying.", url.split('/')[2])
+                    "Connection to %s failed. Retrying.", url.split("/")[2])
                 return []
         return []
 
@@ -172,19 +169,19 @@ class Crawler(ABC):
     def resolve_geetest(self, driver):
         """Resolve GeeTest Captcha"""
         data = re.findall(
-            "geetest_validate: obj.geetest_validate,\n.*?data: \"(.*)\"",
-            driver.page_source
+            'geetest_validate: obj.geetest_validate,\n.*?data: "(.*)"',
+            driver.page_source,
         )[0]
         result = re.findall(
             r"initGeetest\({(.*?)}", driver.page_source, re.DOTALL)
 
-        geetest = re.findall("gt: \"(.*?)\"", result[0])[0]
-        challenge = re.findall("challenge: \"(.*?)\"", result[0])[0]
+        geetest = re.findall('gt: "(.*?)"', result[0])[0]
+        challenge = re.findall('challenge: "(.*?)"', result[0])[0]
         try:
             captcha_response = self.captcha_solver.solve_geetest(
                 geetest,
                 challenge,
-                driver.current_url
+                driver.current_url,
             )
             script = (f'solvedCaptcha({{geetest_challenge: "{captcha_response.challenge}",'
                       f'geetest_seccode: "{captcha_response.sec_code}",'
@@ -202,7 +199,6 @@ class Crawler(ABC):
                         max_tries=3)
     def resolve_awsawf(self, driver):
         """Resolve AWS WAF Captcha"""
-
         # Intercept background network traffic via log sniffing
         sleep(2)
         logs = [json.loads(lr["message"])["message"] for lr in driver.get_log("performance")]
@@ -222,7 +218,7 @@ class Crawler(ABC):
             resp_url = log["params"]["response"]["url"]
             if "problem" in resp_url and "awswaf" in resp_url:
                 response = driver.execute_cdp_cmd(
-                    "Network.getResponseBody", {"requestId": request_id}
+                    "Network.getResponseBody", {"requestId": request_id},
                 )
                 response_json = json.loads(response["body"])
                 iv = response_json["state"]["iv"]
@@ -237,13 +233,13 @@ class Crawler(ABC):
         challenge = None
         challenge_matches = re.findall(r'src="([^"]*challenge\.js)"', driver.page_source)
         for match in challenge_matches:
-            logger.debug('Challenge SRC Value: %s', match)
+            logger.debug("Challenge SRC Value: %s", match)
             challenge = match
 
         jsapi = None
         jsapi_matches = re.findall(r'src="([^"]*jsapi\.js)"', driver.page_source)
         for match in jsapi_matches:
-            logger.debug('JsApi SRC Value: %s', match)
+            logger.debug("JsApi SRC Value: %s", match)
             jsapi = match
 
         if challenge is None or jsapi is None:
@@ -256,12 +252,12 @@ class Crawler(ABC):
                 context,
                 challenge,
                 jsapi,
-                driver.current_url
+                driver.current_url,
             )
-            old_cookie = driver.get_cookie('aws-waf-token')
+            old_cookie = driver.get_cookie("aws-waf-token")
             new_cookie = old_cookie
-            new_cookie['value'] = captcha.token
-            driver.delete_cookie('aws-waf-token')
+            new_cookie["value"] = captcha.token
+            driver.delete_cookie("aws-waf-token")
             driver.add_cookie(new_cookie)
             sleep(1)
             driver.refresh()
@@ -283,11 +279,11 @@ class Crawler(ABC):
             try:
                 captcha_result = self.captcha_solver.solve_recaptcha(
                     google_site_key,
-                    driver.current_url
+                    driver.current_url,
                 ).result
 
                 driver.execute_script(
-                    f'document.getElementById("g-recaptcha-response").innerHTML="{captcha_result}";'
+                    f'document.getElementById("g-recaptcha-response").innerHTML="{captcha_result}";',
                 )
 
                 #  Below function call can be different depending on the websites
@@ -299,12 +295,11 @@ class Crawler(ABC):
             except CaptchaUnsolvableError:
                 driver.refresh()
                 raise
+        elif checkbox:
+            self._clickcaptcha(driver, checkbox)
         else:
-            if checkbox:
-                self._clickcaptcha(driver, checkbox)
-            else:
-                self._wait_for_captcha_resolution(
-                    driver, checkbox, afterlogin_string)
+            self._wait_for_captcha_resolution(
+                driver, checkbox, afterlogin_string)
 
     def _clickcaptcha(self, driver, checkbox: bool):
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
@@ -319,7 +314,7 @@ class Crawler(ABC):
             try:
                 WebDriverWait(driver, 120).until(
                     EC.visibility_of_element_located(
-                        (By.CLASS_NAME, "recaptcha-checkbox-checked"))
+                        (By.CLASS_NAME, "recaptcha-checkbox-checked")),
                 )
             except TimeoutException:
                 logger.warning(

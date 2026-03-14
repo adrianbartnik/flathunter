@@ -1,19 +1,20 @@
 """Captcha solver for 2Captcha Captcha Solving Service (https://2captcha.com)"""
 import json
-from typing import Dict
 from time import sleep
+
 import backoff
 import requests
 
-from flathunter.logging import logger
 from flathunter.captcha.captcha_solver import (
-    CaptchaSolver,
+    AwsAwfResponse,
     CaptchaBalanceEmpty,
+    CaptchaSolver,
     CaptchaUnsolvableError,
     GeetestResponse,
-    AwsAwfResponse,
     RecaptchaResponse,
 )
+from flathunter.logging import logger
+
 
 class TwoCaptchaSolver(CaptchaSolver):
     """Implementation of Captcha solver for 2Captcha"""
@@ -27,7 +28,7 @@ class TwoCaptchaSolver(CaptchaSolver):
             "api_server": "api.geetest.com",
             "gt": geetest,
             "challenge": challenge,
-            "pageurl": page_url
+            "pageurl": page_url,
         }
         captcha_id = self.__submit_2captcha_request(params)
         untyped_result = json.loads(self.__retrieve_2captcha_result(captcha_id))
@@ -42,7 +43,7 @@ class TwoCaptchaSolver(CaptchaSolver):
             "key": self.api_key,
             "method": "userrecaptcha",
             "googlekey": google_site_key,
-            "pageurl": page_url
+            "pageurl": page_url,
         }
         captcha_id = self.__submit_2captcha_request(params)
         return RecaptchaResponse(self.__retrieve_2captcha_result(captcha_id))
@@ -55,13 +56,13 @@ class TwoCaptchaSolver(CaptchaSolver):
         context: str,
         challenge_script: str,
         captcha_script: str,
-        page_url: str
+        page_url: str,
     ) -> AwsAwfResponse:
         """Should be implemented at some point"""
         raise NotImplementedError("AWS WAF captchas not supported for 2Captcha")
 
     @backoff.on_exception(**CaptchaSolver.backoff_options)
-    def __submit_2captcha_request(self, params: Dict[str, str]) -> str:
+    def __submit_2captcha_request(self, params: dict[str, str]) -> str:
         submit_url = "http://2captcha.com/in.php"
         submit_response = requests.post(submit_url, params=params, timeout=30)
         logger.info("Got response from 2captcha/in: %s", submit_response.text)

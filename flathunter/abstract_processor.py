@@ -1,11 +1,12 @@
 """Abstract class defining the 'Processor' interface"""
-from typing import Dict
+
 
 class Processor:
     """Processor interface. Flathunter runs sequences of exposes through
-       a set of processors that stack on each other"""
+    a set of processors that stack on each other
+    """
 
-    def process_expose(self, expose: Dict) -> Dict:
+    def process_expose(self, expose: dict) -> dict:
         """Mutate the expose. Should be implemented in the subclass"""
         return expose
 

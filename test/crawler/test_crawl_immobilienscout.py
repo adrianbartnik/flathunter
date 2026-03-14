@@ -1,5 +1,6 @@
-import pytest
 from time import sleep
+
+import pytest
 
 from flathunter.crawler.immobilienscout import Immobilienscout
 from test.utils.config import StringConfig
@@ -44,7 +45,7 @@ TEST_URLS = [
     "&pricetype=rentpermonth"
     "&geocoordinates=52.52343;13.41144;5.0"
     "&enteredFrom=result_list"
-  )
+  ),
 ]
 
 TEST_API_URLS = [
@@ -92,7 +93,7 @@ TEST_API_URLS = [
     "&realestatetype=apartmentrent"
     "&searchType=radius"
     "&sorting=-firstactivation"
-  )
+  ),
 ]
 
 test_config = StringConfig(string=DUMMY_CONFIG)
@@ -125,7 +126,7 @@ def test_extract_data_from_response(crawler):
     "crawler",
     "price",
     "size",
-    "rooms"
+    "rooms",
   }
   assert entries
   for entry in entries:

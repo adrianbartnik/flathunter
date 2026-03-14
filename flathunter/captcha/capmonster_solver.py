@@ -1,16 +1,17 @@
 """Captcha solver for CapMonster Captcha Solving Service (https://capmonster.cloud)"""
-from typing import Dict
 from time import sleep
+
 import backoff
 import requests
 
-from flathunter.logging import logger
 from flathunter.captcha.captcha_solver import (
+    AwsAwfResponse,
     CaptchaSolver,
     GeetestResponse,
-    AwsAwfResponse,
     RecaptchaResponse,
 )
+from flathunter.logging import logger
+
 
 class CapmonsterSolver(CaptchaSolver):
     """Implementation of Captcha solver for CapMonster"""
@@ -31,7 +32,7 @@ class CapmonsterSolver(CaptchaSolver):
         context: str,
         challenge_script: str,
         captcha_script: str,
-        page_url: str
+        page_url: str,
     ) -> AwsAwfResponse:
         """Solves AWS WAF Captcha"""
         logger.info("Trying to solve AWS WAF.")
@@ -45,15 +46,15 @@ class CapmonsterSolver(CaptchaSolver):
                 "websiteKey": sitekey,
                 "context": "",
                 "iv": "",
-                "cookieSolution": True
-            }
+                "cookieSolution": True,
+            },
         }
         captcha_id = self.__submit_capmonster_request(params)
         untyped_result = self.__retrieve_capmonster_result(captcha_id)
         return AwsAwfResponse(untyped_result)
 
     @backoff.on_exception(**CaptchaSolver.backoff_options)
-    def __submit_capmonster_request(self, params: Dict[str, str]) -> str:
+    def __submit_capmonster_request(self, params: dict[str, str]) -> str:
         submit_url = "https://api.capmonster.cloud/createTask"
         submit_response = requests.post(submit_url, json=params, timeout=30)
         logger.info("Got response from capmonster: %s", submit_response.text)
@@ -67,14 +68,14 @@ class CapmonsterSolver(CaptchaSolver):
         retrieve_url = "https://api.capmonster.cloud/getTaskResult"
         params = {
             "clientKey": self.api_key,
-            "taskId": captcha_id
+            "taskId": captcha_id,
         }
         while True:
             retrieve_response = requests.get(retrieve_url, json=params, timeout=30)
             logger.debug("Got response from capmonster: %s", retrieve_response.text)
 
             response_json = retrieve_response.json()
-            if not "status" in response_json:
+            if "status" not in response_json:
                 raise requests.HTTPError(response=response_json["errorCode"])
 
             if response_json["status"] == "processing":

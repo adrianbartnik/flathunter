@@ -1,6 +1,7 @@
 """Abstract class interface for message notifiers"""
 from abc import ABC, abstractmethod
 
+
 class Notifier(ABC):
     """Notifier class interface definition"""
 

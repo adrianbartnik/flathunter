@@ -1,9 +1,11 @@
-import unittest
-import tempfile
-import os.path
 import os
+import os.path
+import tempfile
+import unittest
+
 from flathunter.config import Config
 from test.utils.config import StringConfig
+
 
 class ConfigTest(unittest.TestCase):
 
@@ -53,16 +55,16 @@ filters:
             config_file.close()
             created = True
         config = Config("config.yaml")
-        self.assertTrue(len(config.get('urls') or []) > 0, "Expected URLs in config file")
+        self.assertTrue(len(config.get("urls") or []) > 0, "Expected URLs in config file")
         if created:
             os.remove("config.yaml")
 
     def test_loads_config_at_file(self):
-       with tempfile.NamedTemporaryFile(mode='w+') as temp:
+       with tempfile.NamedTemporaryFile(mode="w+") as temp:
           temp.write(self.DUMMY_CONFIG)
           temp.flush()
-          config = Config(temp.name) 
-       self.assertTrue(len(config.get('urls') or []) > 0, "Expected URLs in config file")
+          config = Config(temp.name)
+       self.assertTrue(len(config.get("urls") or []) > 0, "Expected URLs in config file")
 
     def test_loads_config_from_string(self):
        config = StringConfig(string=self.EMPTY_FILTERS_CONFIG)

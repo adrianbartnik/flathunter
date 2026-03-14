@@ -1,19 +1,20 @@
 """Captcha solver using ImageTyperz Captcha Solving Service (http://www.imagetyperz.com)"""
 
 import json
-from typing import Dict
 from time import sleep
+
 import backoff
 import requests
 
-from flathunter.logging import logger
 from flathunter.captcha.captcha_solver import (
+    AwsAwfResponse,
     CaptchaSolver,
     CaptchaUnsolvableError,
     GeetestResponse,
-    AwsAwfResponse,
     RecaptchaResponse,
 )
+from flathunter.logging import logger
+
 
 class ImageTyperzSolver(CaptchaSolver):
     """Implementation of Captcha solver for ImageTyperz"""
@@ -29,7 +30,7 @@ class ImageTyperzSolver(CaptchaSolver):
         }
         captcha_id = self.__submit_imagetyperz_request(
             "http://www.captchatypers.com/captchaapi/UploadGeeTestToken.ashx",
-            params
+            params,
         )
         result = self.__retrieve_imagetyperz_result(captcha_id)
 
@@ -55,7 +56,7 @@ class ImageTyperzSolver(CaptchaSolver):
         }
         captcha_id = self.__submit_imagetyperz_request(
             "http://www.captchatypers.com/captchaapi/UploadRecaptchaToken.ashx",
-             params
+             params,
         )
         return RecaptchaResponse(self.__retrieve_imagetyperz_result(captcha_id))
 
@@ -67,13 +68,13 @@ class ImageTyperzSolver(CaptchaSolver):
         context: str,
         challenge_script: str,
         captcha_script: str,
-        page_url: str
+        page_url: str,
     ) -> AwsAwfResponse:
         """Should be implemented at some point"""
         raise NotImplementedError("AWS WAF captchas not supported for Imagetyperz")
 
     @backoff.on_exception(**CaptchaSolver.backoff_options)
-    def __submit_imagetyperz_request(self, submit_url: str, params: Dict[str, str]) -> str:
+    def __submit_imagetyperz_request(self, submit_url: str, params: dict[str, str]) -> str:
         submit_response = requests.get(submit_url, params=params, timeout=30)
         logger.debug("Got response from imagetyperz/request: %s:", submit_response.text)
 

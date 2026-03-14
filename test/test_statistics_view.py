@@ -1,15 +1,10 @@
-import pytest
 import tempfile
-import yaml
-import json
-import requests_mock
 
-from flask import session
+import pytest
 
+from flathunter.idmaintainer import IdMaintainer
 from flathunter.web import app
 from flathunter.web_hunter import WebHunter
-from flathunter.idmaintainer import IdMaintainer
-
 from test.dummy_crawler import DummyCrawler
 from test.utils.config import StringConfig
 
@@ -25,17 +20,17 @@ urls:
 
 @pytest.fixture
 def hunt_client():
-    app.config['TESTING'] = True
-    with tempfile.NamedTemporaryFile(mode='w+') as temp_db:
+    app.config["TESTING"] = True
+    with tempfile.NamedTemporaryFile(mode="w+") as temp_db:
         config = StringConfig(string=DUMMY_CONFIG)
         config.set_searchers([DummyCrawler()])
-        app.config['HUNTER'] = WebHunter(config, IdMaintainer(temp_db.name))
-        app.config['BOT_TOKEN'] = "1234xxx.12345"
-        app.secret_key = b'test_session_key'
+        app.config["HUNTER"] = WebHunter(config, IdMaintainer(temp_db.name))
+        app.config["BOT_TOKEN"] = "1234xxx.12345"
+        app.secret_key = b"test_session_key"
 
         with app.test_client() as hunt_client:
             yield hunt_client
 
 def test_statistics_view(hunt_client):
-    rv = hunt_client.get('/stats')
+    rv = hunt_client.get("/stats")
     assert b'<a class="navbar-brand" href="/">Flathunter</a>' in rv.data

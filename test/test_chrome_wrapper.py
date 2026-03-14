@@ -1,16 +1,16 @@
-import pytest
 import unittest
 from unittest.mock import patch
 
-from flathunter.chrome_wrapper import get_chrome_version, CHROME_BINARY_NAMES
+import pytest
+
+from flathunter.chrome_wrapper import CHROME_BINARY_NAMES, get_chrome_version
 from flathunter.exceptions import ChromeNotFound
 
 
 def calc_linux_binary_names():
+	"""Creates a list containing empty lists for each name in CHROME_BINARY_NAMES that does not start with a forward slash.
 	"""
-	Creates a list containing empty lists for each name in CHROME_BINARY_NAMES that does not start with a forward slash.
-	"""
-	return [[] for name in CHROME_BINARY_NAMES if not name.startswith('/')]
+	return [[] for name in CHROME_BINARY_NAMES if not name.startswith("/")]
 
 
 """
@@ -23,9 +23,9 @@ Append the same amount empty returns to the end so flathunter/chrome_wrapper.py:
 again and self.assertEqual(get_chrome_version(), 116) works out
 """
 CHROME_VERSION_RESULTS = calc_linux_binary_names() + [
-	['Chromium 107.0.5304.87 built on Debian bookworm/sid, running on Debian bookworm/sid'],
-	['Google Chrome 107.0.5304.110'],
-	['Chromium 107.0.5304.87 built on Debian 11.5, running on Debian 11.5'],
+	["Chromium 107.0.5304.87 built on Debian bookworm/sid, running on Debian bookworm/sid"],
+	["Google Chrome 107.0.5304.110"],
+	["Chromium 107.0.5304.87 built on Debian 11.5, running on Debian 11.5"],
 ] + calc_linux_binary_names()
 
 """
@@ -35,20 +35,20 @@ self.assertEqual(get_chrome_version(), None) works out correctly
 REG_VERSION_RESULTS = [
 	[],
 	[
-		'',
-		r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon',
-		'    version    REG_SZ    116.0.5845.141',
-		'',
-	]
+		"",
+		r"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon",
+		"    version    REG_SZ    116.0.5845.141",
+		"",
+	],
 ]
 
-def my_subprocess_mock(args, static={ 'chrome_calls': 0, 'reg_calls': 0 }):
-    if 'chrom' in args[0]:
-        static['chrome_calls'] += 1
-        return CHROME_VERSION_RESULTS[static['chrome_calls'] - 1]
-    if 'reg' in args[0]:
-        static['reg_calls'] += 1
-        return REG_VERSION_RESULTS[static['reg_calls'] - 1]
+def my_subprocess_mock(args, static={ "chrome_calls": 0, "reg_calls": 0 }):
+    if "chrom" in args[0]:
+        static["chrome_calls"] += 1
+        return CHROME_VERSION_RESULTS[static["chrome_calls"] - 1]
+    if "reg" in args[0]:
+        static["reg_calls"] += 1
+        return REG_VERSION_RESULTS[static["reg_calls"] - 1]
 
 class ChromeWrapperTest(unittest.TestCase):
 

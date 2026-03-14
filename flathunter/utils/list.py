@@ -1,12 +1,12 @@
 """Utility type for chunking lists"""
 
-from typing import List, TypeVar, Generator
+from collections.abc import Generator
+from typing import TypeVar
 
 CLT = TypeVar("CLT")
 
-def chunk_list(list_var: List[CLT], size: int) -> Generator[List[CLT], None, None]:
-    """
-    split a list into the given chunk size
+def chunk_list(list_var: list[CLT], size: int) -> Generator[list[CLT]]:
+    """Split a list into the given chunk size
     :param l: input list
     :param size: output chunk size
     :return:

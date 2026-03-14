@@ -1,15 +1,13 @@
 """Functions and classes related to sending Telegram messages"""
 import json
 import time
-from typing import List, Dict, Optional
 
 import requests
 
 from flathunter.abstract_notifier import Notifier
 from flathunter.abstract_processor import Processor
 from flathunter.config import YamlConfig
-from flathunter.exceptions import BotBlockedException
-from flathunter.exceptions import UserDeactivatedException
+from flathunter.exceptions import BotBlockedException, UserDeactivatedException
 from flathunter.logging import logger
 from flathunter.utils.list import chunk_list
 
@@ -40,11 +38,10 @@ class SenderTelegram(Processor, Notifier):
         return expose
 
     def __broadcast(self,
-                    receivers: List[int],
+                    receivers: list[int],
                     message: str,
-                    images: Optional[List[str]] = None) -> None:
-        """
-        Broadcast given message to the given receiver ids
+                    images: list[str] | None = None) -> None:
+        """Broadcast given message to the given receiver ids
         :param receivers: list of user/group ids
         :param message: text message to send to users
         :param images: images to send to users as a reply to message
@@ -59,29 +56,26 @@ class SenderTelegram(Processor, Notifier):
                 self.__send_images(chat_id=receiver, msg=msg, images=images)
 
     def notify(self, message: str):
-        """
-        Send messages to each of the receivers in receiver_ids
+        """Send messages to each of the receivers in receiver_ids
         :param message: a message that should be sent to users
         :return: None
         """
         self.__broadcast(self.receiver_ids, message, None)
 
-    def __send_text(self, chat_id: int, message: str) -> Dict:
-        """
-        Send bot text message, the message may contain a simple
+    def __send_text(self, chat_id: int, message: str) -> dict:
+        """Send bot text message, the message may contain a simple
         heartbeat message or an apartment information
         :param chat_id: the receiver id
         :param message: the body of the message
         :return: sent message information
         """
-
         payload = {
-            'chat_id': str(chat_id),
-            'text': message,
+            "chat_id": str(chat_id),
+            "text": message,
         }
-        logger.debug(('token:', self.bot_token))
-        logger.debug(('chat_id:', chat_id))
-        logger.debug(('text:', message))
+        logger.debug(("token:", self.bot_token))
+        logger.debug(("chat_id:", chat_id))
+        logger.debug(("text:", message))
         logger.debug("Retrieving URL %s, payload %s", self.__text_message_url, payload)
         response = requests.request("POST", self.__text_message_url, data=payload, timeout=30)
         logger.debug("Got response (%i): %s", response.status_code, response.content)
@@ -92,11 +86,10 @@ class SenderTelegram(Processor, Notifier):
                 response, chat_id)
             return {}
 
-        return response.json().get('result', {})
+        return response.json().get("result", {})
 
-    def __send_images(self, chat_id: int, msg: Dict, images: List[str]):
-        """
-        Send image to given user id (receiver).
+    def __send_images(self, chat_id: int, msg: dict, images: list[str]):
+        """Send image to given user id (receiver).
         If msg is not None, it will send the images as a response to given message
         :param chat_id: the user/group that will receive the image
         :param msg: message that will be replied to
@@ -107,13 +100,13 @@ class SenderTelegram(Processor, Notifier):
         # if there are more than 10 images, we need to divide it into multiple messages.
         for chunk in chunk_list(images, 10):
             payload = {
-                'chat_id': str(chat_id),
+                "chat_id": str(chat_id),
                 # media expected to be an array of objects in string format
-                'media': json.dumps([{"type": "photo", "media": url} for url in chunk]),
-                'disable_notification': True,
+                "media": json.dumps([{"type": "photo", "media": url} for url in chunk]),
+                "disable_notification": True,
             }
-            if msg.get('message_id', None):
-                payload['reply_to_message_id'] = msg.get('message_id')
+            if msg.get("message_id"):
+                payload["reply_to_message_id"] = msg.get("message_id")
 
             response = requests.request("POST", self.__media_group_url, data=payload, timeout=30)
 
@@ -122,13 +115,12 @@ class SenderTelegram(Processor, Notifier):
                 self.__handle_error(
                     "When sending media group, we got an error.",
                     response=response,
-                    chat_id=str(chat_id)
+                    chat_id=str(chat_id),
                 )
                 return
 
     def __handle_error(self, msg: str, response, chat_id) -> None:
-        """
-        Handles telegram API error responses
+        """Handles telegram API error responses
         :param msg: the message for logging
         :param response: the response that is received form the API
         :param chat_id: the receiver that was supposed to get the message
@@ -153,26 +145,24 @@ class SenderTelegram(Processor, Notifier):
             if "Too Many Requests" in data.get("description", ""):
                 backoff = data.get("parameters", {}).get("retry_after", 30)
                 time.sleep(min(backoff, 30))
-                return None
-        return None
+                return
+        return
 
-    def __get_images(self, expose: Dict) -> List[str]:
+    def __get_images(self, expose: dict) -> list[str]:
         return expose.get("images", [])
 
-    def __get_text_message(self, expose: Dict) -> str:
-        """
-        Build text message based on the exposed data
+    def __get_text_message(self, expose: dict) -> str:
+        """Build text message based on the exposed data
         :param expose: dictionary
         :return: str
         """
-
         return self.config.message_format().format(
-            crawler=expose.get('crawler', 'N/A'),
-            title=expose.get('title', 'N/A'),
-            rooms=expose.get('rooms', 'N/A'),
-            size=expose.get('size', 'N/A'),
-            price=expose.get('price', 'N/A'),
-            url=expose.get('url', 'N/A'),
-            address=expose.get('address', 'N/A'),
-            durations=expose.get('durations', 'N/A')
+            crawler=expose.get("crawler", "N/A"),
+            title=expose.get("title", "N/A"),
+            rooms=expose.get("rooms", "N/A"),
+            size=expose.get("size", "N/A"),
+            price=expose.get("price", "N/A"),
+            url=expose.get("url", "N/A"),
+            address=expose.get("address", "N/A"),
+            durations=expose.get("durations", "N/A"),
         ).strip()

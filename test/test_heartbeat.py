@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import Mock
 
-from flathunter.heartbeat import Heartbeat, HeartbeatException
 from flathunter.config import YamlConfig
+from flathunter.heartbeat import Heartbeat, HeartbeatException
+
 
 class HeartbeatTest(unittest.TestCase):
 

@@ -1,15 +1,15 @@
 import contextlib
-import unittest
-import tempfile
-import os.path
 import os
+import os.path
+import tempfile
+import unittest
+
 from flathunter.config import Config
-from test.utils.config import StringConfig
+
 
 @contextlib.contextmanager
 def modified_environ(*remove, **update):
-    """
-    Temporarily updates the ``os.environ`` dictionary in-place.
+    """Temporarily updates the ``os.environ`` dictionary in-place.
 
     The ``os.environ`` dictionary is updated in-place so that the modification
     is sure to work in all situations.
@@ -47,14 +47,14 @@ immoscout_cookie: abdcd
 """
 
     def setUp(self):
-         with tempfile.NamedTemporaryFile(mode='w+') as temp:
+         with tempfile.NamedTemporaryFile(mode="w+") as temp:
             temp.write(self.DUMMY_CONFIG)
             temp.flush()
             self.config = Config(temp.name)
 
     def test_loads_config_from_env(self):
        with modified_environ(FLATHUNTER_DATABASE_LOCATION="test"):
-         self.assertEqual("test", os.getenv('FLATHUNTER_DATABASE_LOCATION'))
+         self.assertEqual("test", os.getenv("FLATHUNTER_DATABASE_LOCATION"))
          self.assertEqual("test", self.config.database_location())
 
     def test_overrides_url(self):
@@ -65,5 +65,5 @@ immoscout_cookie: abdcd
     def test_is24_cookie(self):
         self.assertEqual("abdcd", self.config.immoscout_cookie())
         with modified_environ(FLATHUNTER_IS24_COOKIE="bbbb"):
-            self.assertEqual("bbbb", self.config.immoscout_cookie()) 
+            self.assertEqual("bbbb", self.config.immoscout_cookie())
 

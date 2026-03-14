@@ -1,15 +1,17 @@
 """Schemas for Immobilienscout crawler"""
 from typing import Any, ClassVar, Literal
+
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     field_serializer,
     field_validator,
-    model_validator
+    model_validator,
 )
 
 from flathunter.logging import logger
+
 
 class ImmoscoutQuery(BaseModel):
     """Pydantic model to validate and transform an Immoscout search URL"""
@@ -18,7 +20,7 @@ class ImmoscoutQuery(BaseModel):
         "haus-mieten": "houserent",
         "wohnung-mieten": "apartmentrent",
         "wohnung-kaufen": "apartmentbuy",
-        "haus-kaufen": "housebuy"
+        "haus-kaufen": "housebuy",
     }
 
     REAL_ESTATE_TYPE_TO_APARTMENT_EQUIPMENT_MAP: ClassVar[dict] = {
@@ -41,7 +43,7 @@ class ImmoscoutQuery(BaseModel):
         "wohnung-mit-keller-mieten": { "equipment": ["cellar"] },
         # Category "Merkmale"
         "neubauwohnung-mieten": { "newbuilding": "true" },
-        "barrierefreie-wohnung-mieten": { "equipment": ["handicappedaccessible"] }
+        "barrierefreie-wohnung-mieten": { "equipment": ["handicappedaccessible"] },
     }
 
     SORTING_MAP: ClassVar[dict] = {
@@ -51,7 +53,7 @@ class ImmoscoutQuery(BaseModel):
         "5": "-rooms", # number of rooms descending
         "6": "rooms", # number of rooms ascending
         "7": "-livingspace", # living space descending
-        "8": "livingspace" # living space ascending
+        "8": "livingspace", # living space ascending
     }
 
     model_config = ConfigDict(serialize_by_alias=True)
@@ -63,10 +65,10 @@ class ImmoscoutQuery(BaseModel):
     exclusioncriteria: list[str] | None = Field(title="Objektart", default=None)
     floor: str | None = Field(title="Etage", default=None)
     geocodes: str | None = Field(
-        description="Path following '/Suche/' up to second to last element", default=None
+        description="Path following '/Suche/' up to second to last element", default=None,
     )
     geocoordinates: str | None = Field(
-        description="Geocoordinates for radius-based search", default=None
+        description="Geocoordinates for radius-based search", default=None,
     )
     haspromotion: bool | None = Field(title="Wohnberechtigungsschein (WBS)", default=None)
     heatingtypes: list[str] | None = Field(title="Heizungsart", default=None)
@@ -79,18 +81,18 @@ class ImmoscoutQuery(BaseModel):
     petsallowedtypes: list[str] | None = Field(title="Haustiere", default=None)
     price: str | None = Field(title="Kalt/Warmmiete in €", default=None)
     pricetype: Literal["calculatedtotalrent", "rentpermonth"] = Field(
-        description="Warm or net rent", default="rentpermonth"
+        description="Warm or net rent", default="rentpermonth",
     )
     realestatetype: Literal["apartmentbuy", "apartmentrent", "housebuy", "houserent"] = Field(
-        description="Real estate and contract type"
+        description="Real estate and contract type",
     )
     searchtype: Literal["region", "radius"] = Field(
-        description="Radius or region based search", serialization_alias="searchType"
+        description="Radius or region based search", serialization_alias="searchType",
     )
     sorting: str = Field(
         description="Sorting type identifier, default means newest offer first",
         default="2",
-        validate_default=True
+        validate_default=True,
     )
 
     @model_validator(mode="before")
@@ -99,7 +101,7 @@ class ImmoscoutQuery(BaseModel):
         """Derives API query parameters from real estate type"""
         real_estate_type = data.get("realestatetype")
         additional_params = cls.REAL_ESTATE_TYPE_TO_APARTMENT_EQUIPMENT_MAP.get(
-            real_estate_type, {}
+            real_estate_type, {},
         )
         for k, v in additional_params.items():
             data[k] = data[k] + v if isinstance(data.get(k), list) else v
@@ -107,7 +109,7 @@ class ImmoscoutQuery(BaseModel):
 
     @field_validator(
         "realestatetype",
-        mode="before"
+        mode="before",
     )
     @classmethod
     def map_real_estate_type(cls, real_estate_type: str) -> str:
@@ -117,13 +119,13 @@ class ImmoscoutQuery(BaseModel):
         except KeyError as e:
             logger.warning(
                 "Unknown real estate and contract type %s, defaulting to rental apartment",
-                str(e)
+                str(e),
             )
             return "apartmentrent"
 
     @field_validator(
         "sorting",
-        mode="after"
+        mode="after",
     )
     @classmethod
     def map_sorting_identifier(cls, sorting_id: int) -> str:
@@ -132,13 +134,13 @@ class ImmoscoutQuery(BaseModel):
             return cls.SORTING_MAP[sorting_id]
         except KeyError as e:
             logger.warning(
-                "Unknown sorting identifier %s, defaulting to newest offers first", str(e)
+                "Unknown sorting identifier %s, defaulting to newest offers first", str(e),
             )
             return "-firstactivation"
 
     @field_serializer(
         "haspromotion",
-        "newbuilding"
+        "newbuilding",
     )
     @classmethod
     def serialize_booleans(cls, value: bool) -> str:

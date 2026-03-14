@@ -1,10 +1,12 @@
 import unittest
+
 from flathunter.hunter import Hunter
 from flathunter.idmaintainer import IdMaintainer
 from flathunter.processor import ProcessorChain
 from test.dummy_crawler import DummyCrawler
 from test.test_util import count
 from test.utils.config import StringConfig
+
 
 class ProcessorTest(unittest.TestCase):
 
@@ -25,7 +27,7 @@ google_maps_api:
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
         for expose in exposes:
-            self.assertFalse(expose['address'].startswith('http'), "Expected addresses to be processed by default")
+            self.assertFalse(expose["address"].startswith("http"), "Expected addresses to be processed by default")
 
     def test_address_processor(self):
         crawler = DummyCrawler(addresses_as_links=True)
@@ -33,10 +35,10 @@ google_maps_api:
         config.set_searchers([crawler])
         exposes = crawler.get_results("https://www.example.com/search")
         for expose in exposes:
-            self.assertTrue(expose['address'].startswith('http'), "Expected addresses not yet to be processed")
+            self.assertTrue(expose["address"].startswith("http"), "Expected addresses not yet to be processed")
         chain = ProcessorChain.builder(config) \
             .resolve_addresses() \
             .build()
         exposes = chain.process(exposes)
         for expose in exposes:
-            self.assertFalse(expose['address'].startswith('http'), "Expected addresses to be processed")
+            self.assertFalse(expose["address"].startswith("http"), "Expected addresses to be processed")

@@ -1,7 +1,8 @@
 import collections
 
+
 def count(iterable):
-    if hasattr(iterable, '__len__'):
+    if hasattr(iterable, "__len__"):
         return len(iterable)
 
     d = collections.deque(enumerate(iterable, 1), maxlen=1)

@@ -1,6 +1,5 @@
 """Functions and classes related to sending Slack messages"""
 import json
-from typing import Dict
 
 import requests
 
@@ -17,17 +16,17 @@ class SenderSlack(Processor, Notifier):
         self.config = config
         self.webhook_url = self.config.slack_webhook_url()
 
-    def process_expose(self, expose: Dict) -> Dict:
+    def process_expose(self, expose: dict) -> dict:
         """Send a message to a Slack channel describing the expose"""
         message = self.config.message_format().format(
-            title=expose['title'],
-            rooms=expose['rooms'],
-            size=expose['size'],
-            price=expose['price'],
-            url=expose['url'],
-            address=expose['address'],
-            durations="" if 'durations' not in expose else expose[
-                'durations']).strip()
+            title=expose["title"],
+            rooms=expose["rooms"],
+            size=expose["size"],
+            price=expose["price"],
+            url=expose["url"],
+            address=expose["address"],
+            durations="" if "durations" not in expose else expose[
+                "durations"]).strip()
         self.notify(message)
         return expose
 
@@ -37,12 +36,12 @@ class SenderSlack(Processor, Notifier):
 
     def __send_message(self, message: str) -> None:
         """Send messages to the Slack webhook"""
-        logger.debug(('webhook_url:', self.webhook_url))
-        logger.debug(('message', message))
+        logger.debug(("webhook_url:", self.webhook_url))
+        logger.debug(("message", message))
         response = requests.post(
             self.webhook_url,
             data=json.dumps({"text": message}),
-            timeout=30
+            timeout=30,
         )
         logger.debug("Got response (%i): %s", response.status_code, response.content)
 
@@ -50,5 +49,5 @@ class SenderSlack(Processor, Notifier):
             logger.error(
                 "When sending Slack bot message, we got status %i with message: %s",
                 response.status_code,
-                response.text
+                response.text,
             )

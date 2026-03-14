@@ -1,25 +1,26 @@
-import unittest
 import re
-from typing import Optional, Dict, List
+import unittest
+
 from flathunter.crawler.immowelt import Immowelt
-from flathunter.hunter import Hunter 
+from flathunter.hunter import Hunter
 from flathunter.idmaintainer import IdMaintainer
 from test.dummy_crawler import DummyCrawler
 from test.test_util import count
 from test.utils.config import StringConfig
 
-def find_number_in_expose(expose: Dict, field: str) -> Optional[float]:
+
+def find_number_in_expose(expose: dict, field: str) -> float | None:
   search_text = expose.get(field, "")
-  match = re.search(r'\d+([\.,]\d+)?', search_text)
+  match = re.search(r"\d+([\.,]\d+)?", search_text)
   if match is None:
     return None
   return float(match[0])
 
-def filter_less_than(exposes: List[Dict], field: str, comparison: float) -> List[Dict]:
+def filter_less_than(exposes: list[dict], field: str, comparison: float) -> list[dict]:
   return list(filter(
     lambda expose: (find_number_in_expose(expose, field) or 1000000) < comparison, exposes))
 
-def filter_greater_than(exposes: List[Dict], field: str, comparison: float) -> List[Dict]:
+def filter_greater_than(exposes: list[dict], field: str, comparison: float) -> list[dict]:
   return list(filter(
     lambda expose: (find_number_in_expose(expose, field) or 0) > comparison, exposes))
 
@@ -120,7 +121,7 @@ excluded_titles:
         with self.assertRaises(Exception) as context:
             Hunter(dict(), IdMaintainer(":memory:"))  # type: ignore
 
-        self.assertTrue('Invalid config' in str(context.exception))
+        self.assertTrue("Invalid config" in str(context.exception))
 
     def test_filter_titles_legacy(self):
         titlewords = [ "wg", "tausch", "flat", "ruhig", "gruen" ]
@@ -130,7 +131,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = list(filter(lambda expose: any(word in expose['title'] for word in filteredwords), exposes))
+        unfiltered = list(filter(lambda expose: any(word in expose["title"] for word in filteredwords), exposes))
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got expose: ", expose)
@@ -144,7 +145,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = list(filter(lambda expose: any(word in expose['title'] for word in filteredwords), exposes))
+        unfiltered = list(filter(lambda expose: any(word in expose["title"] for word in filteredwords), exposes))
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -157,7 +158,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_less_than(exposes, 'price', min_price)
+        unfiltered = filter_less_than(exposes, "price", min_price)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -170,7 +171,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_greater_than(exposes, 'price', max_price)
+        unfiltered = filter_greater_than(exposes, "price", max_price)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -183,7 +184,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_greater_than(exposes, 'size', max_size)
+        unfiltered = filter_greater_than(exposes, "size", max_size)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -196,7 +197,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_less_than(exposes, 'size', min_size)
+        unfiltered = filter_less_than(exposes, "size", min_size)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -209,7 +210,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_greater_than(exposes, 'rooms', max_rooms)
+        unfiltered = filter_greater_than(exposes, "rooms", max_rooms)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)
@@ -222,7 +223,7 @@ excluded_titles:
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
         self.assertTrue(count(exposes) > 4, "Expected to find exposes")
-        unfiltered = filter_less_than(exposes, 'rooms', min_rooms)
+        unfiltered = filter_less_than(exposes, "rooms", min_rooms)
         if len(unfiltered) > 0:
             for expose in unfiltered:
                 print("Got unfiltered expose: ", expose)

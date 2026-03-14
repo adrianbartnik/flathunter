@@ -1,16 +1,17 @@
 """Expose crawler for Kleinanzeigen"""
-import re
 import datetime
+import re
 
 from bs4 import Tag
 
-from flathunter.webdriver_crawler import WebdriverCrawler
 from flathunter.logging import logger
+from flathunter.webdriver_crawler import WebdriverCrawler
+
 
 class Kleinanzeigen(WebdriverCrawler):
     """Implementation of Crawler interface for Kleinanzeigen"""
 
-    URL_PATTERN = re.compile(r'https://www\.kleinanzeigen\.de')
+    URL_PATTERN = re.compile(r"https://www\.kleinanzeigen\.de")
     MONTHS = {
         "Januar": "01",
         "Februar": "02",
@@ -23,18 +24,18 @@ class Kleinanzeigen(WebdriverCrawler):
         "September": "09",
         "Oktober": "10",
         "November": "11",
-        "Dezember": "12"
+        "Dezember": "12",
     }
 
     def get_expose_details(self, expose):
-        soup = self.get_page(expose['url'], self.get_driver())
-        for detail in soup.find_all('li', {"class": "addetailslist--detail"}):
-            if re.match(r'Verfügbar ab', detail.text):
-                date_string = re.match(r'(\w+) (\d{4})', detail.text)
+        soup = self.get_page(expose["url"], self.get_driver())
+        for detail in soup.find_all("li", {"class": "addetailslist--detail"}):
+            if re.match(r"Verfügbar ab", detail.text):
+                date_string = re.match(r"(\w+) (\d{4})", detail.text)
                 if date_string is not None:
-                    expose['from'] = "01." + self.MONTHS[date_string[1]] + "." + date_string[2]
-        if 'from' not in expose:
-            expose['from'] = datetime.datetime.now().strftime('%02d.%02m.%Y')
+                    expose["from"] = "01." + self.MONTHS[date_string[1]] + "." + date_string[2]
+        if "from" not in expose:
+            expose["from"] = datetime.datetime.now().strftime("%02d.%02m.%Y")
         return expose
 
     # pylint: disable=too-many-locals
@@ -69,12 +70,12 @@ class Kleinanzeigen(WebdriverCrawler):
                 image = None
 
             address = address.text.strip()
-            address = address.replace('\n', ' ').replace('\r', '')
+            address = address.replace("\n", " ").replace("\r", "")
             address = " ".join(address.split())
 
             rooms = ""
             if len(tags) > 1:
-                rooms_match = re.search(r'\d+[.|,]*\d*', tags[1].text, flags=re.MULTILINE)
+                rooms_match = re.search(r"\d+[.|,]*\d*", tags[1].text, flags=re.MULTILINE)
                 if rooms_match is not None:
                     rooms = rooms_match.group()
 
@@ -84,19 +85,19 @@ class Kleinanzeigen(WebdriverCrawler):
                 size = ""
 
             details = {
-                'id': int(expose.get("data-adid")),
-                'image': image,
-                'url': ("https://www.kleinanzeigen.de" + url),
-                'title': title_elem.text.strip(),
-                'price': price,
-                'size': size,
-                'rooms': rooms,
-                'address': address,
-                'crawler': self.get_name()
+                "id": int(expose.get("data-adid")),
+                "image": image,
+                "url": ("https://www.kleinanzeigen.de" + url),
+                "title": title_elem.text.strip(),
+                "price": price,
+                "size": size,
+                "rooms": rooms,
+                "address": address,
+                "crawler": self.get_name(),
             }
             entries.append(details)
 
-        logger.debug('Number of entries found: %d', len(entries))
+        logger.debug("Number of entries found: %d", len(entries))
 
         return entries
 

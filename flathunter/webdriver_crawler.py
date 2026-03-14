@@ -1,12 +1,12 @@
 """Expose crawler for Kleinanzeigen"""
-from typing import Optional
 
-from selenium.webdriver import Chrome
 from bs4 import BeautifulSoup
+from selenium.webdriver import Chrome
 
 from flathunter.abstract_crawler import Crawler
 from flathunter.chrome_wrapper import get_chrome_driver
 from flathunter.exceptions import DriverLoadException
+
 
 class WebdriverCrawler(Crawler):
     """Parent class of crawlers that use webdriver rather than `requests` to fetch pages"""
@@ -16,7 +16,7 @@ class WebdriverCrawler(Crawler):
         self.config = config
         self.driver = None
 
-    def get_driver(self) -> Optional[Chrome]:
+    def get_driver(self) -> Chrome | None:
         """Lazy method to fetch the driver as required at runtime"""
         if self.driver is not None:
             return self.driver
