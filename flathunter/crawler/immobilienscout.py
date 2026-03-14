@@ -1,4 +1,4 @@
-"""Expose crawler for ImmobilienScout"""
+"""Expose crawler for ImmobilienScout."""
 import re
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -11,7 +11,7 @@ from flathunter.schemas.immobilienscout import ImmoscoutQuery
 STATIC_URL_PATTERN = re.compile(r"https://www\.immobilienscout24\.de")
 
 class Immobilienscout(Crawler):
-    """Implementation of Crawler interface for ImmobilienScout"""
+    """Implementation of Crawler interface for ImmobilienScout."""
 
     URL_PATTERN = STATIC_URL_PATTERN
 
@@ -30,7 +30,7 @@ class Immobilienscout(Crawler):
 
     def get_immoscout_query(self, search_url: str) -> ImmoscoutQuery:
         """Builds an Immoscout query from a web interface URL,
-        transforms and validates parameters
+        transforms and validates parameters.
         """
         parsed_url = urlparse(search_url)
         path_elements = parsed_url.path.split("/")
@@ -67,7 +67,7 @@ class Immobilienscout(Crawler):
         )
 
     def compose_api_url(self, query: ImmoscoutQuery) -> str:
-        """Constructs a mobile API URL from an Immoscout query"""
+        """Constructs a mobile API URL from an Immoscout query."""
         api_url = "https://api.mobile.immobilienscout24.de/search/list?"
         query_dict = query.model_dump(exclude_none=True)
         for k, v in query_dict.items():
@@ -77,21 +77,20 @@ class Immobilienscout(Crawler):
         return api_url + urlencode(query_dict)
 
     def fetch_api_data(self, search_url: str, page_no: int | None = None) -> requests.Response:
-        """Applies a page number to a formatted API URL and fetches the exposes at that page"""
+        """Applies a page number to a formatted API URL and fetches the exposes at that page."""
         data = {
             "supportedResultListType": [],
             "userData": {},
         }
-        response = requests.post(
+        return requests.post(
             search_url.format(page_no),
             headers=self.HEADERS,
             json=data,
             timeout=30,
         )
-        return response
 
     def extract_data(self, raw_data: dict) -> list:
-        """Extracts all exposes from a JSON dictionary"""
+        """Extracts all exposes from a JSON dictionary."""
         entries = []
 
         results = filter(
@@ -130,7 +129,7 @@ class Immobilienscout(Crawler):
         return entries
 
     def get_results(self, search_url: str, max_pages: int | None = None) -> list:
-        """Fetches the exposes from the ImmoScout mobile API, starting at the provided URL"""
+        """Fetches the exposes from the ImmoScout mobile API, starting at the provided URL."""
         query = self.get_immoscout_query(search_url)
         api_url = self.compose_api_url(query)
         if "&pagenumber" in api_url:

@@ -1,4 +1,4 @@
-"""Providing heartbeat messages"""
+"""Providing heartbeat messages."""
 from flathunter.abstract_notifier import Notifier
 from flathunter.config import YamlConfig
 from flathunter.exceptions import HeartbeatException
@@ -7,7 +7,7 @@ from flathunter.notifiers import SenderSlack, SenderTelegram
 
 
 def interval2counter(interval: str) -> int:
-    """Transform the string interval to sleeper counter frequencies"""
+    """Transform the string interval to sleeper counter frequencies."""
     if interval is None:
         return 0
     if interval.lower() == "hour":
@@ -16,17 +16,18 @@ def interval2counter(interval: str) -> int:
         return 86400
     if interval.lower() == "week":
         return 604800
+    msg = "No valid heartbeat instruction received - no heartbeat messages will be sent."
     raise HeartbeatException(
-        "No valid heartbeat instruction received - no heartbeat messages will be sent.")
+        msg)
 
 
 class Heartbeat:
-    """Will inform the user on regular intervals whether the bot is still alive"""
+    """Will inform the user on regular intervals whether the bot is still alive."""
 
     notifier: Notifier
     interval: int
 
-    def __init__(self, config: YamlConfig, interval: str):
+    def __init__(self, config: YamlConfig, interval: str) -> None:
         notifiers = config.notifiers()
 
         if "telegram" in notifiers:
@@ -34,12 +35,13 @@ class Heartbeat:
         elif "slack" in notifiers:
             self.notifier = SenderSlack(config)
         else:
-            raise HeartbeatException("No notifier configured - check 'notifiers' config section!")
+            msg = "No notifier configured - check 'notifiers' config section!"
+            raise HeartbeatException(msg)
 
         self.interval = int(interval2counter(interval)/int(config.loop_period_seconds()))
 
     def send_heartbeat(self, counter) -> int:
-        """Send a new heartbeat message"""
+        """Send a new heartbeat message."""
         if not self.notifier or not self.interval:  # interval is disabled
             return counter
         # it's time for a new heartbeat message and reset counter

@@ -1,4 +1,4 @@
-"""Main module for Web Interface"""
+"""Main module for Web Interface."""
 import collections
 import hashlib
 import hmac
@@ -14,19 +14,19 @@ from flathunter.web.util import sanitize_float
 
 
 class AuthenticationError(Exception):
-    """Wrapper for authentication exceptions"""
+    """Wrapper for authentication exceptions."""
 
 class User(dict):
-    """Object to represent a user. Must be JSON Serializable for the session"""
+    """Object to represent a user. Must be JSON Serializable for the session."""
 
-    def __init__(self, parameters):
+    def __init__(self, parameters) -> None:
         super().__init__(parameters)
         for field in ["id"]:
             if field not in parameters:
                 raise AuthenticationError("Missing field: " + field)
 
 def auth_hash(params, token):
-    """Calculate the authentication hash for given params and secret token"""
+    """Calculate the authentication hash for given params and secret token."""
     secret = hashlib.sha256()
     secret.update(token.encode("utf-8"))
     sorted_params = collections.OrderedDict(sorted(params.items()))
@@ -34,12 +34,12 @@ def auth_hash(params, token):
     return hmac.new(secret.digest(), msg.encode("utf-8"), digestmod=hashlib.sha256).hexdigest()
 
 def sign_hash(params, token):
-    """Sign a parameter hash with authentication token"""
+    """Sign a parameter hash with authentication token."""
     params["hash"] = auth_hash(params, token)
     return params
 
 def user_for_params(params):
-    """Load the user object corresponding to the supplied parameters"""
+    """Load the user object corresponding to the supplied parameters."""
     if "hash" not in params:
         log.warning("Got login request with no authentication hash")
         return None
@@ -52,7 +52,7 @@ def user_for_params(params):
     return None
 
 def generate_dummy_login_url():
-    """Generate a fake login URL for when we're working locally"""
+    """Generate a fake login URL for when we're working locally."""
     return "/login_with_telegram?" + parse.urlencode(sign_hash(
         {
             "username": "mattdamon",
@@ -64,19 +64,19 @@ def generate_dummy_login_url():
         }, app.config["BOT_TOKEN"]))
 
 def filter_values_for_user():
-    """Load the filter settings for a specific user"""
+    """Load the filter settings for a specific user."""
     if "user" not in session:
         return None
     return app.config["HUNTER"].get_filters_for_user(session["user"]["id"])
 
 def filter_for_user():
-    """Load the filter for the current user"""
+    """Load the filter for the current user."""
     if filter_values_for_user() is None:
         return None
     return FilterBuilder().read_config(YamlConfig({"filters": filter_values_for_user()})).build()
 
 def form_filter_values():
-    """Extract the filter settings from the submitted form"""
+    """Extract the filter settings from the submitted form."""
     values = {}
     filters = filter_values_for_user()
     if filters is not None:
@@ -85,7 +85,7 @@ def form_filter_values():
     return values
 
 def notifications_muted_for_user():
-    """True if the user has muted notifications"""
+    """True if the user has muted notifications."""
     if "user" not in session:
         return None
     return app.config["HUNTER"].notifications_muted_for_user(session["user"]["id"])
@@ -93,7 +93,7 @@ def notifications_muted_for_user():
 @app.route("/index")
 @app.route("/")
 def index():
-    """Render the index page"""
+    """Render the index page."""
     hunter = app.config["HUNTER"]
     bot_name = app.config.get("BOT_NAME", None)
     domain = app.config.get("DOMAIN", None)
@@ -108,18 +108,18 @@ def index():
 
 @app.route("/about")
 def about():
-    """Render the About page"""
+    """Render the About page."""
     return render_template("about.html")
 
 @app.route("/resources")
 def resources():
-    """Render the Resources page"""
+    """Render the Resources page."""
     return render_template("resources.html")
 
 # Accept GET requests here to support Google Cloud Cron calls
 @app.route("/hunt", methods=["GET", "POST"])
 def hunt():
-    """Trigger the hunt"""
+    """Trigger the hunt."""
     hunter = app.config["HUNTER"]
     hunter.hunt_flats()
     return jsonify(status="Success",
@@ -129,13 +129,13 @@ def hunt():
 
 @app.route("/logout")
 def logout():
-    """Logout current user"""
+    """Logout current user."""
     session.pop("user")
     return redirect("/")
 
 @app.route("/login_with_telegram")
 def login_with_telegram():
-    """Login with Telegram authentication"""
+    """Login with Telegram authentication."""
     try:
         user = user_for_params(request.args.copy())
         if user is not None:
@@ -148,7 +148,7 @@ def login_with_telegram():
 
 @app.route("/toggle_notifications", methods=["POST"])
 def toggle_notifications():
-    """Toggle notifications for the logged-in user"""
+    """Toggle notifications for the logged-in user."""
     if "user" not in session:
         return jsonify(status="Not found", message="Not logged in"), status.HTTP_404_NOT_FOUND
     notifications_enabled = app.config["HUNTER"].toggle_notification_status(session["user"]["id"])
@@ -158,7 +158,7 @@ def toggle_notifications():
 
 @app.route("/filter", methods=["POST"])
 def update_filter():
-    """Update the filter for the logged-in user"""
+    """Update the filter for the logged-in user."""
     if "user" not in session:
         return redirect("/")
     filters = {k: sanitize_float(v) for k, v in request.form.items() if v != "" \

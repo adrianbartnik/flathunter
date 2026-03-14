@@ -25,7 +25,7 @@ def get_time_span_in_secs(time_a, time_b):
     return (24*60*60) - a_secs + b_secs
 
 
-def wait_during_period(time_from, time_till):
+def wait_during_period(time_from, time_till) -> None:
     """Waits for the end of the pause period if necessary."""
     if is_current_time_between(time_from, time_till):
         logger.info("Paused loop. Waiting till %s.", time_till)

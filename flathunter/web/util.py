@@ -1,10 +1,10 @@
-"""Utility functions for views"""
+"""Utility functions for views."""
 import numbers
 import re
 
 
 def sanitize_float(float_string: str):
-    """Turn a number string into a valid float"""
+    """Turn a number string into a valid float."""
     if isinstance(float_string, numbers.Number):
         return float(float_string)
     digits = re.match(r"\d+", float_string)

@@ -46,24 +46,24 @@ urls:
 immoscout_cookie: abdcd
 """
 
-    def setUp(self):
+    def setUp(self) -> None:
          with tempfile.NamedTemporaryFile(mode="w+") as temp:
             temp.write(self.DUMMY_CONFIG)
             temp.flush()
             self.config = Config(temp.name)
 
-    def test_loads_config_from_env(self):
+    def test_loads_config_from_env(self) -> None:
        with modified_environ(FLATHUNTER_DATABASE_LOCATION="test"):
-         self.assertEqual("test", os.getenv("FLATHUNTER_DATABASE_LOCATION"))
-         self.assertEqual("test", self.config.database_location())
+         assert os.getenv("FLATHUNTER_DATABASE_LOCATION") == "test"
+         assert self.config.database_location() == "test"
 
-    def test_overrides_url(self):
-        self.assertEqual(["https://www.immowelt.de/"], self.config.target_urls())
+    def test_overrides_url(self) -> None:
+        assert self.config.target_urls() == ["https://www.immowelt.de/"]
         with modified_environ(FLATHUNTER_TARGET_URLS="https://fish.com"):
-            self.assertEqual(["https://fish.com"], self.config.target_urls())
+            assert self.config.target_urls() == ["https://fish.com"]
 
-    def test_is24_cookie(self):
-        self.assertEqual("abdcd", self.config.immoscout_cookie())
+    def test_is24_cookie(self) -> None:
+        assert self.config.immoscout_cookie() == "abdcd"
         with modified_environ(FLATHUNTER_IS24_COOKIE="bbbb"):
-            self.assertEqual("bbbb", self.config.immoscout_cookie())
+            assert self.config.immoscout_cookie() == "bbbb"
 

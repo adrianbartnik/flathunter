@@ -1,4 +1,4 @@
-"""Expose crawler for Kleinanzeigen"""
+"""Expose crawler for Kleinanzeigen."""
 import datetime
 import re
 
@@ -9,7 +9,7 @@ from flathunter.webdriver_crawler import WebdriverCrawler
 
 
 class Kleinanzeigen(WebdriverCrawler):
-    """Implementation of Crawler interface for Kleinanzeigen"""
+    """Implementation of Crawler interface for Kleinanzeigen."""
 
     URL_PATTERN = re.compile(r"https://www\.kleinanzeigen\.de")
     MONTHS = {
@@ -40,7 +40,7 @@ class Kleinanzeigen(WebdriverCrawler):
 
     # pylint: disable=too-many-locals
     def extract_data(self, raw_data):
-        """Extracts all exposes from a provided Soup object"""
+        """Extracts all exposes from a provided Soup object."""
         entries = []
         soup = raw_data.find(id="srchrslt-adtable")
 
@@ -64,10 +64,7 @@ class Kleinanzeigen(WebdriverCrawler):
                 logger.warning("Unable to process eBay expose: %s", str(error))
                 continue
 
-            if image_element is not None:
-                image = image_element["data-imgsrc"]
-            else:
-                image = None
+            image = image_element["data-imgsrc"] if image_element is not None else None
 
             address = address.text.strip()
             address = address.replace("\n", " ").replace("\r", "")
@@ -102,7 +99,7 @@ class Kleinanzeigen(WebdriverCrawler):
         return entries
 
     def load_address(self, url):
-        """Extract address from expose itself"""
+        """Extract address from expose itself."""
         expose_soup = self.get_page(url)
         street_raw = ""
         street_el = expose_soup.find(id="street-address")

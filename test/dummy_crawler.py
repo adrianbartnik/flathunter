@@ -8,7 +8,9 @@ from flathunter.logging import logger
 class DummyCrawler(Crawler):
     URL_PATTERN = re.compile(r"https://www\.example\.com")
 
-    def __init__(self, titlewords=[ "wg", "tausch", "flat", "ruhig", "gruen" ], addresses_as_links=False):
+    def __init__(self, titlewords=None, addresses_as_links=False) -> None:
+        if titlewords is None:
+            titlewords = ["wg", "tausch", "flat", "ruhig", "gruen"]
         seed(1)
         self.titlewords = titlewords
         self.addresses_as_links = addresses_as_links
@@ -21,7 +23,7 @@ class DummyCrawler(Crawler):
             details = {
                 "id": expose_id,
                 "url": "https://www.example.com/expose/" + str(expose_id),
-                "title": "Great flat %s terrible landlord" % (choice(self.titlewords)),
+                "title": f"Great flat {choice(self.titlewords)} terrible landlord",
                 "price": "%d EUR" % (randint(300, 3000)),
                 "size": "%d m^2" % (randint(15, 150)),
                 "rooms": "%d" % (randint(1, 5)),
@@ -35,5 +37,5 @@ class DummyCrawler(Crawler):
         return entries
 
     @staticmethod
-    def load_address(url):
+    def load_address(url) -> str:
         return "1600 Pennsylvania Ave"

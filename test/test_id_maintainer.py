@@ -28,22 +28,22 @@ filters:
   max_price: 1000
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.maintainer = IdMaintainer(":memory:")
 
-    def test_read_after_write(self):
+    def test_read_after_write(self) -> None:
         self.maintainer.mark_processed(12345)
-        self.assertTrue(self.maintainer.is_processed(12345), "Expected ID to be saved")
+        assert self.maintainer.is_processed(12345), "Expected ID to be saved"
 
-    def test_get_last_run_time_none_by_default(self):
-        self.assertIsNone(self.maintainer.get_last_run_time(), "Expected last run time to be none")
+    def test_get_last_run_time_none_by_default(self) -> None:
+        assert self.maintainer.get_last_run_time() is None, "Expected last run time to be none"
 
-    def test_get_list_run_time_is_updated(self):
+    def test_get_list_run_time_is_updated(self) -> None:
         time = self.maintainer.update_last_run_time()
-        self.assertIsNotNone(time, "Expected time not to be none")
-        self.assertEqual(time, self.maintainer.get_last_run_time(), "Expected last run time to be updated")
+        assert time is not None, "Expected time not to be none"
+        assert time == self.maintainer.get_last_run_time(), "Expected last run time to be updated"
 
-def test_is_processed_works(mocker):
+def test_is_processed_works(mocker) -> None:
     config = StringConfig(string=IdMaintainerTest.DUMMY_CONFIG)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -53,7 +53,7 @@ def test_is_processed_works(mocker):
     for expose in exposes:
         assert id_watch.is_processed(expose["id"])
 
-def test_ids_are_added_to_maintainer(mocker):
+def test_ids_are_added_to_maintainer(mocker) -> None:
     config = StringConfig(string=IdMaintainerTest.DUMMY_CONFIG)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -63,7 +63,7 @@ def test_ids_are_added_to_maintainer(mocker):
     assert count(exposes) > 4
     assert spy.call_count == 24
 
-def test_exposes_are_saved_to_maintainer():
+def test_exposes_are_saved_to_maintainer() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -74,7 +74,7 @@ def test_exposes_are_saved_to_maintainer():
     assert len(saved) > 0
     assert count(exposes) < len(saved)
 
-def test_exposes_are_returned_as_dictionaries():
+def test_exposes_are_returned_as_dictionaries() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -86,7 +86,7 @@ def test_exposes_are_returned_as_dictionaries():
     assert expose["title"] is not None
     assert expose["created_at"] is not None
 
-def test_exposes_are_returned_with_limit():
+def test_exposes_are_returned_with_limit() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -104,7 +104,7 @@ def compare_int_less_equal(expose: dict, key: str, comparison: int) -> bool:
         return False
     return int(match[0]) <= comparison
 
-def test_exposes_are_returned_filtered():
+def test_exposes_are_returned_filtered() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     config.set_searchers([DummyCrawler()])
     id_watch = IdMaintainer(":memory:")
@@ -117,7 +117,7 @@ def test_exposes_are_returned_filtered():
     for expose in saved:
         assert compare_int_less_equal(expose, "size", 70)
 
-def test_filters_for_user_are_saved():
+def test_filters_for_user_are_saved() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     id_watch = IdMaintainer(":memory:")
     filter = { "fish": "cat" }
@@ -125,7 +125,7 @@ def test_filters_for_user_are_saved():
     hunter.set_filters_for_user(123, filter)
     assert hunter.get_filters_for_user(123) == filter
 
-def test_all_filters_can_be_loaded():
+def test_all_filters_can_be_loaded() -> None:
     config = StringConfig(string=IdMaintainerTest.CONFIG_WITH_FILTERS)
     id_watch = IdMaintainer(":memory:")
     filter = { "fish": "cat" }

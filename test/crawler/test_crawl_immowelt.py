@@ -16,7 +16,7 @@ def crawler():
     return Immowelt(StringConfig(string=DUMMY_CONFIG))
 
 
-def test_crawler(crawler):
+def test_crawler(crawler) -> None:
     soup = crawler.get_page(TEST_URL)
     assert soup is not None
     entries = crawler.extract_data(soup)
@@ -27,11 +27,11 @@ def test_crawler(crawler):
     for attr in [ "title", "price", "size", "rooms", "address" ]:
         assert entries[0][attr] is not None
 
-def test_dont_crawl_other_urls(crawler):
+def test_dont_crawl_other_urls(crawler) -> None:
     exposes = crawler.crawl("https://www.example.com")
     assert count(exposes) == 0
 
-def test_process_expose_fetches_details(crawler):
+def test_process_expose_fetches_details(crawler) -> None:
     soup = crawler.get_page(TEST_URL)
     assert soup is not None
     entries = crawler.extract_data(soup)
@@ -39,6 +39,5 @@ def test_process_expose_fetches_details(crawler):
     assert len(entries) > 0
     updated_entries = [ crawler.get_expose_details(expose) for expose in entries ]
     for expose in updated_entries:
-        print(expose)
         for attr in [ "title", "price", "size", "rooms", "address", "from" ]:
             assert expose[attr] is not None

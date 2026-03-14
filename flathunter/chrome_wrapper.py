@@ -1,6 +1,6 @@
 """Chrome needs some special handling to work out where the correct
 binary is, to attach the correct selenium chromedriver, and to set
-the correct version number
+the correct version number.
 """
 import re
 import subprocess
@@ -18,7 +18,7 @@ CHROME_BINARY_NAMES = ["google-chrome", "chromium", "chrome", "chromium-browser"
                        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
 
 def get_command_output(args) -> list[str]:
-    """Run a command and return stdout"""
+    """Run a command and return stdout."""
     try:
         with subprocess.Popen(args,
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -30,7 +30,7 @@ def get_command_output(args) -> list[str]:
         return []
 
 def get_chrome_version() -> int:
-    """Determine the correct name for the chrome binary"""
+    """Determine the correct name for the chrome binary."""
     for binary_name in CHROME_BINARY_NAMES:
         try:
             version_output = get_command_output([binary_name, "--version"])
@@ -54,10 +54,10 @@ def get_chrome_version() -> int:
             return int(version_matches[0].group(1))
     except FileNotFoundError:
         pass
-    raise ChromeNotFound()
+    raise ChromeNotFound
 
 def get_chrome_driver(driver_arguments):
-    """Configure Chrome WebDriver"""
+    """Configure Chrome WebDriver."""
     logger.info("Initializing Chrome WebDriver for crawler...")
     chrome_options = uc.ChromeOptions() # pylint: disable=no-member
     if platform == "darwin":

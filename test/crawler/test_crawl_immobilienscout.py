@@ -102,20 +102,20 @@ test_config = StringConfig(string=DUMMY_CONFIG)
 def crawler():
     return Immobilienscout(test_config)
 
-@pytest.mark.parametrize("test_url, test_api_url", zip(TEST_URLS, TEST_API_URLS))
-def test_url_conversion(crawler, test_url, test_api_url):
+@pytest.mark.parametrize(("test_url", "test_api_url"), zip(TEST_URLS, TEST_API_URLS, strict=False))
+def test_url_conversion(crawler, test_url, test_api_url) -> None:
     query = crawler.get_immoscout_query(test_url)
     api_url = crawler.compose_api_url(query)
     assert api_url == test_api_url
 
 @pytest.mark.parametrize("test_api_url", TEST_API_URLS)
-def test_api_response(crawler, test_api_url):
+def test_api_response(crawler, test_api_url) -> None:
   response = crawler.fetch_api_data(test_api_url)
   assert response.status_code == 200
   # throttle to not flood api
   sleep(1)
 
-def test_extract_data_from_response(crawler):
+def test_extract_data_from_response(crawler) -> None:
   entries = crawler.get_results(crawler.config.target_urls()[0])
   required_keys = {
     "id",

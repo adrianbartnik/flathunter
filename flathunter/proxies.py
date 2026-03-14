@@ -1,11 +1,10 @@
-"""Gets proxies"""
+"""Gets proxies."""
 import requests
 from lxml.html import fromstring
 
 
 def get_proxies():
-    """Gets random, free proxies
-    """
+    """Gets random, free proxies."""
     url = "https://free-proxy-list.net/"
     response = requests.get(url, timeout=30)
     parser = fromstring(response.text)

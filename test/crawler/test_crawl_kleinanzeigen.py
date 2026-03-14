@@ -14,7 +14,7 @@ TEST_URL = "https://www.kleinanzeigen.de/s-wohnung-mieten/berlin/preis:1000:1500
 def crawler():
     return Kleinanzeigen(StringConfig(string=DUMMY_CONFIG))
 
-def test_crawler(crawler):
+def test_crawler(crawler) -> None:
     soup = crawler.get_page(TEST_URL)
     assert soup is not None
     entries = crawler.extract_data(soup)
@@ -25,7 +25,7 @@ def test_crawler(crawler):
     for attr in [ "title", "price", "size", "rooms", "address" ]:
         assert entries[0][attr]
 
-def test_process_expose_fetches_details(crawler):
+def test_process_expose_fetches_details(crawler) -> None:
     soup = crawler.get_page(TEST_URL)
     assert soup is not None
     entries = crawler.extract_data(soup)
@@ -33,6 +33,5 @@ def test_process_expose_fetches_details(crawler):
     assert len(entries) > 0
     updated_entries = [ crawler.get_expose_details(expose) for expose in entries ]
     for expose in updated_entries:
-        print(expose)
         for attr in [ "title", "price", "size", "rooms", "address", "from" ]:
             assert expose[attr]

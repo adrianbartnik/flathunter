@@ -1,4 +1,4 @@
-"""Schemas for Immobilienscout crawler"""
+"""Schemas for Immobilienscout crawler."""
 from typing import Any, ClassVar, Literal
 
 from pydantic import (
@@ -14,7 +14,7 @@ from flathunter.logging import logger
 
 
 class ImmoscoutQuery(BaseModel):
-    """Pydantic model to validate and transform an Immoscout search URL"""
+    """Pydantic model to validate and transform an Immoscout search URL."""
 
     REAL_ESTATE_TYPE_MAP: ClassVar[dict] = {
         "haus-mieten": "houserent",
@@ -98,7 +98,7 @@ class ImmoscoutQuery(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def set_fields_based_on_real_estate_type(cls, data: Any) -> Any:
-        """Derives API query parameters from real estate type"""
+        """Derives API query parameters from real estate type."""
         real_estate_type = data.get("realestatetype")
         additional_params = cls.REAL_ESTATE_TYPE_TO_APARTMENT_EQUIPMENT_MAP.get(
             real_estate_type, {},
@@ -113,7 +113,7 @@ class ImmoscoutQuery(BaseModel):
     )
     @classmethod
     def map_real_estate_type(cls, real_estate_type: str) -> str:
-        """Maps real estate type from search URL to API URL"""
+        """Maps real estate type from search URL to API URL."""
         try:
             return cls.REAL_ESTATE_TYPE_MAP[real_estate_type]
         except KeyError as e:
@@ -129,7 +129,7 @@ class ImmoscoutQuery(BaseModel):
     )
     @classmethod
     def map_sorting_identifier(cls, sorting_id: int) -> str:
-        """Maps sorting type ID to API parameter"""
+        """Maps sorting type ID to API parameter."""
         try:
             return cls.SORTING_MAP[sorting_id]
         except KeyError as e:
@@ -144,5 +144,5 @@ class ImmoscoutQuery(BaseModel):
     )
     @classmethod
     def serialize_booleans(cls, value: bool) -> str:
-        """Converts Python-type booleans to JSON equivalents"""
+        """Converts Python-type booleans to JSON equivalents."""
         return "true" if value else "false"

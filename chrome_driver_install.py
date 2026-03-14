@@ -1,4 +1,4 @@
-"""Script to trigger installation of chrome driver during docker image build"""
+"""Script to trigger installation of chrome driver during docker image build."""
 import logging
 import os
 

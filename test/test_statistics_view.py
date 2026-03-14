@@ -31,6 +31,6 @@ def hunt_client():
         with app.test_client() as hunt_client:
             yield hunt_client
 
-def test_statistics_view(hunt_client):
+def test_statistics_view(hunt_client) -> None:
     rv = hunt_client.get("/stats")
     assert b'<a class="navbar-brand" href="/">Flathunter</a>' in rv.data

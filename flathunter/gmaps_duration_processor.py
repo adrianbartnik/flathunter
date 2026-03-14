@@ -1,4 +1,4 @@
-"""Calculate Google-Maps distances between specific locations and the target flat"""
+"""Calculate Google-Maps distances between specific locations and the target flat."""
 import datetime
 import time
 from urllib.parse import quote_plus
@@ -10,22 +10,22 @@ from flathunter.logging import logger
 
 
 class GMapsDurationProcessor(Processor):
-    """Implementation of Processor class to calculate travel durations"""
+    """Implementation of Processor class to calculate travel durations."""
 
     GM_MODE_TRANSIT = "transit"
     GM_MODE_BICYCLE = "bicycling"
     GM_MODE_DRIVING = "driving"
 
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
 
     def process_expose(self, expose):
-        """Calculate the durations for an expose"""
+        """Calculate the durations for an expose."""
         expose["durations"] = self.get_formatted_durations(expose["address"]).strip()
         return expose
 
     def get_formatted_durations(self, address):
-        """Return a formatted list of GoogleMaps durations"""
+        """Return a formatted list of GoogleMaps durations."""
         out = ""
         for duration in self.config.get("durations", []):
             if "destination" in duration and "name" in duration:
@@ -41,7 +41,7 @@ class GMapsDurationProcessor(Processor):
         return out.strip()
 
     def get_gmaps_distance(self, address, dest, mode):
-        """Get the distance"""
+        """Get the distance."""
         # get timestamp for next monday at 9:00:00 o'clock
         now = datetime.datetime.today().replace(hour=9, minute=0, second=0)
         next_monday = now + datetime.timedelta(days=7 - now.weekday())

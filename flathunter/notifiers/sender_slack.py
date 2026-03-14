@@ -1,4 +1,4 @@
-"""Functions and classes related to sending Slack messages"""
+"""Functions and classes related to sending Slack messages."""
 import json
 
 import requests
@@ -10,14 +10,14 @@ from flathunter.logging import logger
 
 
 class SenderSlack(Processor, Notifier):
-    """Expose processor that sends Slack messages"""
+    """Expose processor that sends Slack messages."""
 
     def __init__(self, config: YamlConfig) -> None:
         self.config = config
         self.webhook_url = self.config.slack_webhook_url()
 
     def process_expose(self, expose: dict) -> dict:
-        """Send a message to a Slack channel describing the expose"""
+        """Send a message to a Slack channel describing the expose."""
         message = self.config.message_format().format(
             title=expose["title"],
             rooms=expose["rooms"],
@@ -25,17 +25,16 @@ class SenderSlack(Processor, Notifier):
             price=expose["price"],
             url=expose["url"],
             address=expose["address"],
-            durations="" if "durations" not in expose else expose[
-                "durations"]).strip()
+            durations=expose.get("durations", "")).strip()
         self.notify(message)
         return expose
 
     def notify(self, message: str) -> None:
-        """Send message to the Slack webhook"""
+        """Send message to the Slack webhook."""
         self.__send_message(message)
 
     def __send_message(self, message: str) -> None:
-        """Send messages to the Slack webhook"""
+        """Send messages to the Slack webhook."""
         logger.debug(("webhook_url:", self.webhook_url))
         logger.debug(("message", message))
         response = requests.post(

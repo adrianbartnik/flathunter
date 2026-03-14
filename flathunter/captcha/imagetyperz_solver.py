@@ -1,4 +1,4 @@
-"""Captcha solver using ImageTyperz Captcha Solving Service (http://www.imagetyperz.com)"""
+"""Captcha solver using ImageTyperz Captcha Solving Service (http://www.imagetyperz.com)."""
 
 import json
 from time import sleep
@@ -17,7 +17,7 @@ from flathunter.logging import logger
 
 
 class ImageTyperzSolver(CaptchaSolver):
-    """Implementation of Captcha solver for ImageTyperz"""
+    """Implementation of Captcha solver for ImageTyperz."""
 
     def solve_geetest(self, geetest: str, challenge: str, page_url: str) -> GeetestResponse:
         logger.info("Trying to solve geetest.")
@@ -70,8 +70,9 @@ class ImageTyperzSolver(CaptchaSolver):
         captcha_script: str,
         page_url: str,
     ) -> AwsAwfResponse:
-        """Should be implemented at some point"""
-        raise NotImplementedError("AWS WAF captchas not supported for Imagetyperz")
+        """Should be implemented at some point."""
+        msg = "AWS WAF captchas not supported for Imagetyperz"
+        raise NotImplementedError(msg)
 
     @backoff.on_exception(**CaptchaSolver.backoff_options)
     def __submit_imagetyperz_request(self, submit_url: str, params: dict[str, str]) -> str:
@@ -106,7 +107,7 @@ class ImageTyperzSolver(CaptchaSolver):
                 continue
 
             if response["Status"] == "ERROR: IMAGE_TIMED_OUT":
-                raise CaptchaUnsolvableError()
+                raise CaptchaUnsolvableError
             if not response["Status"] == "Solved":
                 raise requests.HTTPError(response=retrieve_response)
 

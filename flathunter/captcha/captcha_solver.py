@@ -10,7 +10,7 @@ import requests
 
 @dataclass
 class GeetestResponse:
-    """Responde from GeeTest Captcha"""
+    """Responde from GeeTest Captcha."""
 
     challenge: str
     validate: str
@@ -18,19 +18,19 @@ class GeetestResponse:
 
 @dataclass
 class RecaptchaResponse:
-    """Response from reCAPTCHA"""
+    """Response from reCAPTCHA."""
 
     result: str
 
 @dataclass
 class AwsAwfResponse:
-    """Response from AWS WAF"""
+    """Response from AWS WAF."""
 
     token: str
 
 
 class CaptchaSolver:
-    """Interface for Captcha solvers"""
+    """Interface for Captcha solvers."""
 
     backoff_options = {
         "wait_gen": backoff.constant,
@@ -38,11 +38,11 @@ class CaptchaSolver:
         "max_time": 100,
     }
 
-    def __init__(self, api_key):
+    def __init__(self, api_key) -> None:
         self.api_key = api_key
 
     def solve_geetest(self, geetest: str, challenge: str, page_url: str) -> GeetestResponse:
-        """Should be implemented in subclass"""
+        """Should be implemented in subclass."""
         raise NotImplementedError
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -55,17 +55,17 @@ class CaptchaSolver:
         captcha_script: str,
         page_url: str,
     ) -> AwsAwfResponse:
-        """Should be implemented in subclass"""
+        """Should be implemented in subclass."""
         raise NotImplementedError
 
     def solve_recaptcha(self, google_site_key: str, page_url: str) -> RecaptchaResponse:
-        """Should be implemented in subclass"""
+        """Should be implemented in subclass."""
         raise NotImplementedError
 
 class CaptchaUnsolvableError(Exception):
-    """Raised when Captcha was unsolveable"""
+    """Raised when Captcha was unsolveable."""
 
-    def __init__(self, message = None):
+    def __init__(self, message = None) -> None:
         super().__init__()
         if message is not None:
             self.message = message
@@ -73,8 +73,8 @@ class CaptchaUnsolvableError(Exception):
             self.message = "Failed to solve captcha."
 
 class CaptchaBalanceEmpty(Exception):
-    """Raised when Captcha account is out of credit"""
+    """Raised when Captcha account is out of credit."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.message = "Captcha account balance empty."

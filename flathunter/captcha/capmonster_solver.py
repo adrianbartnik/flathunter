@@ -1,4 +1,4 @@
-"""Captcha solver for CapMonster Captcha Solving Service (https://capmonster.cloud)"""
+"""Captcha solver for CapMonster Captcha Solving Service (https://capmonster.cloud)."""
 from time import sleep
 
 import backoff
@@ -14,15 +14,17 @@ from flathunter.logging import logger
 
 
 class CapmonsterSolver(CaptchaSolver):
-    """Implementation of Captcha solver for CapMonster"""
+    """Implementation of Captcha solver for CapMonster."""
 
     def solve_geetest(self, geetest: str, challenge: str, page_url: str) -> GeetestResponse:
-        """Should be implemented in subclass"""
-        raise NotImplementedError("Geetest captcha solving is not implemented for CapMonster")
+        """Should be implemented in subclass."""
+        msg = "Geetest captcha solving is not implemented for CapMonster"
+        raise NotImplementedError(msg)
 
     def solve_recaptcha(self, google_site_key: str, page_url: str) -> RecaptchaResponse:
-        """Should be implemented in subclass"""
-        raise NotImplementedError("Recaptcha captcha solving is not implemented for Capmonster")
+        """Should be implemented in subclass."""
+        msg = "Recaptcha captcha solving is not implemented for Capmonster"
+        raise NotImplementedError(msg)
 
     # pylint: disable=too-many-arguments,too-many-positional-arguments
     def solve_awswaf(
@@ -34,7 +36,7 @@ class CapmonsterSolver(CaptchaSolver):
         captcha_script: str,
         page_url: str,
     ) -> AwsAwfResponse:
-        """Solves AWS WAF Captcha"""
+        """Solves AWS WAF Captcha."""
         logger.info("Trying to solve AWS WAF.")
         params = {
             "clientKey": self.api_key,

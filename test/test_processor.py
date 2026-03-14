@@ -20,25 +20,25 @@ google_maps_api:
   enable: true
     """
 
-    def test_addresses_are_processed_by_hunter(self):
+    def test_addresses_are_processed_by_hunter(self) -> None:
         config = StringConfig(string=self.DUMMY_CONFIG)
         config.set_searchers([DummyCrawler(addresses_as_links=True)])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         for expose in exposes:
-            self.assertFalse(expose["address"].startswith("http"), "Expected addresses to be processed by default")
+            assert not expose["address"].startswith("http"), "Expected addresses to be processed by default"
 
-    def test_address_processor(self):
+    def test_address_processor(self) -> None:
         crawler = DummyCrawler(addresses_as_links=True)
         config = StringConfig(string=self.DUMMY_CONFIG)
         config.set_searchers([crawler])
         exposes = crawler.get_results("https://www.example.com/search")
         for expose in exposes:
-            self.assertTrue(expose["address"].startswith("http"), "Expected addresses not yet to be processed")
+            assert expose["address"].startswith("http"), "Expected addresses not yet to be processed"
         chain = ProcessorChain.builder(config) \
             .resolve_addresses() \
             .build()
         exposes = chain.process(exposes)
         for expose in exposes:
-            self.assertFalse(expose["address"].startswith("http"), "Expected addresses to be processed")
+            assert not expose["address"].startswith("http"), "Expected addresses to be processed"

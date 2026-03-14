@@ -1,4 +1,4 @@
-"""Initialize website module"""
+"""Initialize website module."""
 # pylint: disable=wrong-import-position
 from flask import Flask
 from flask.logging import create_logger

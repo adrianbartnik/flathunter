@@ -1,4 +1,4 @@
-"""Startup file for Google Cloud deployment or local webserver"""
+"""Startup file for Google Cloud deployment or local webserver."""
 from flathunter.argument_parser import parse
 from flathunter.config import Config
 from flathunter.idmaintainer import IdMaintainer
@@ -9,10 +9,7 @@ from flathunter.web_hunter import WebHunter
 # load config
 args = parse()
 config_handle = args.config
-if config_handle is not None:
-    config = Config(config_handle.name)
-else:
-    config = Config()
+config = Config(config_handle.name) if config_handle is not None else Config()
 
 # Use the SQLite DB file if we are running locally
 id_watch = IdMaintainer(f"{config.database_location()}/processed_ids.db")

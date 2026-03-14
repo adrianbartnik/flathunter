@@ -1,4 +1,4 @@
-"""Default Flathunter implementation for the command line"""
+"""Default Flathunter implementation for the command line."""
 import traceback
 from itertools import chain
 
@@ -13,17 +13,18 @@ from flathunter.processor import ProcessorChain
 
 
 class Hunter:
-    """Basic methods for crawling and processing / filtering exposes"""
+    """Basic methods for crawling and processing / filtering exposes."""
 
-    def __init__(self, config: YamlConfig, id_watch):
+    def __init__(self, config: YamlConfig, id_watch) -> None:
         self.config = config
         if not isinstance(self.config, YamlConfig):
+            msg = "Invalid config for hunter - should be a 'Config' object"
             raise ConfigException(
-                "Invalid config for hunter - should be a 'Config' object")
+                msg)
         self.id_watch = id_watch
 
     def crawl_for_exposes(self, max_pages=None):
-        """Trigger a new crawl of the configured URLs"""
+        """Trigger a new crawl of the configured URLs."""
         def try_crawl(searcher, url, max_pages):
             try:
                 return searcher.crawl(url, max_pages)
@@ -39,7 +40,7 @@ class Hunter:
                        for url in self.config.target_urls()])
 
     def hunt_flats(self, max_pages: None|int = None):
-        """Crawl, process and filter exposes"""
+        """Crawl, process and filter exposes."""
         filter_set = Filter.builder() \
                            .read_config(self.config) \
                            .filter_already_seen(self.id_watch) \

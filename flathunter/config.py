@@ -1,4 +1,4 @@
-"""Wrap configuration options as an object"""
+"""Wrap configuration options as an object."""
 import json
 import os
 from typing import Any, Protocol
@@ -20,17 +20,17 @@ from flathunter.logging import logger
 load_dotenv()
 
 class Readenv(Protocol):
-    """Type information for the read_env callback"""
+    """Type information for the read_env callback."""
 
     @staticmethod
     def __call__() -> str | None: ...
 
 def _read_env(key: str, fallback: str | None = None) -> Readenv:
-    """Read the given key from environment"""
+    """Read the given key from environment."""
     return lambda: os.environ.get(key, fallback)
 
 def _to_bool(value: Any) -> bool:
-    """Cast config parameters to booleans"""
+    """Cast config parameters to booleans."""
     if isinstance(value, bool):
         return value
     value = str(value).strip().lower()
@@ -43,7 +43,7 @@ def _to_bool(value: Any) -> bool:
     raise ValueError(error_msg)
 
 class Env:
-    """Reads data from the environment"""
+    """Reads data from the environment."""
 
     # Captcha setup
     FLATHUNTER_2CAPTCHA_KEY = _read_env("FLATHUNTER_2CAPTCHA_KEY")
@@ -99,7 +99,7 @@ class Env:
         "FLATHUNTER_FILTER_MAX_PRICE_PER_SQUARE")
 
 def elide(string):
-    """Obfuscate the value of a string for debug purposes"""
+    """Obfuscate the value of a string for debug purposes."""
     if string is None or len(string) == 0:
         return None
     if len(string) < 6:
@@ -109,7 +109,7 @@ def elide(string):
 
 
 class YamlConfig:  # pylint: disable=too-many-public-methods
-    """Generic config object constructed from nested dictionaries"""
+    """Generic config object constructed from nested dictionaries."""
 
     DEFAULT_MESSAGE_FORMAT = """{title}
 Zimmer: {rooms}
@@ -118,7 +118,7 @@ Preis: {price}
 
 {url}"""
 
-    def __init__(self, config=None):
+    def __init__(self, config=None) -> None:
         if config is None:
             config = {}
         self.config = config
@@ -126,23 +126,23 @@ Preis: {price}
         self.check_deprecated()
 
     def __iter__(self):
-        """Emulate dictionary"""
+        """Emulate dictionary."""
         return self.config.__iter__()
 
     def __getitem__(self, value):
-        """Emulate dictionary"""
+        """Emulate dictionary."""
         return self.config[value]
 
-    def init_searchers(self):
-        """Initialize search plugins"""
+    def init_searchers(self) -> None:
+        """Initialize search plugins."""
         self.__searchers__ = [
             Immobilienscout(self),
             Kleinanzeigen(self),
             Immowelt(self),
         ]
 
-    def check_deprecated(self):
-        """Notifies user of deprecated config items"""
+    def check_deprecated(self) -> None:
+        """Notifies user of deprecated config items."""
         captcha_config = self.config.get("captcha")
         if captcha_config is not None:
             if captcha_config.get("imagetypers") is not None:
@@ -159,11 +159,11 @@ Preis: {price}
                 )
 
     def get(self, key, value=None):
-        """Emulate dictionary"""
+        """Emulate dictionary."""
         return self.config.get(key, value)
 
     def _read_yaml_path(self, path, default_value):
-        """Resolve a dotted variable path in nested dictionaries"""
+        """Resolve a dotted variable path in nested dictionaries."""
         config = self.config
         parts = path.split(".")
         while len(parts) > 1 and config is not None:
@@ -176,148 +176,148 @@ Preis: {price}
             return default_value
         return res
 
-    def set_searchers(self, searchers):
-        """Update the active search plugins"""
+    def set_searchers(self, searchers) -> None:
+        """Update the active search plugins."""
         self.__searchers__ = searchers
 
     def searchers(self):
-        """Get the list of search plugins"""
+        """Get the list of search plugins."""
         return self.__searchers__
 
     def get_filter(self):
-        """Read the configured filter"""
+        """Read the configured filter."""
         builder = Filter.builder()
         builder.read_config(self)
         return builder.build()
 
     def captcha_enabled(self):
-        """Check if captcha is configured"""
+        """Check if captcha is configured."""
         return self._get_captcha_solver() is not None
 
     def get_captcha_checkbox(self) -> bool:
-        """Check if captcha checkbox support is needed"""
+        """Check if captcha checkbox support is needed."""
         return self._read_yaml_path("captcha.checkbox", False)
 
     def get_captcha_afterlogin_string(self):
-        """Check if afterlogin string should be presented"""
+        """Check if afterlogin string should be presented."""
         return self._read_yaml_path("captcha.afterlogin_string", "")
 
     def database_location(self):
-        """Return the location of the database folder"""
+        """Return the location of the database folder."""
         config_database_location = self._read_yaml_path("database_location", None)
         if config_database_location is not None:
             return config_database_location
         return os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
     def target_urls(self) -> list[str]:
-        """List of target URLs for crawling"""
+        """List of target URLs for crawling."""
         return self._read_yaml_path("urls", [])
 
     def verbose_logging(self):
-        """Return true if logging should be verbose"""
+        """Return true if logging should be verbose."""
         return self._read_yaml_path("verbose", None) is not None
 
     def loop_is_active(self):
-        """Return true if flathunter should be crawling in a loop"""
+        """Return true if flathunter should be crawling in a loop."""
         return self._read_yaml_path("loop.active", False)
 
     def loop_period_seconds(self):
-        """Number of seconds to wait between crawls when looping"""
+        """Number of seconds to wait between crawls when looping."""
         return self._read_yaml_path("loop.sleeping_time", 60 * 10)
 
     def random_jitter_enabled(self):
-        """Whether a random delay should be added to loop sleeping time, defaults to true"""
+        """Whether a random delay should be added to loop sleeping time, defaults to true."""
         return self._read_yaml_path("loop.random_jitter", True)
 
     def loop_pause_from(self):
-        """Start time of loop pause"""
+        """Start time of loop pause."""
         return self._read_yaml_path("loop.pause.from", "00:00")
 
     def loop_pause_till(self):
-        """End time of loop pause"""
+        """End time of loop pause."""
         return self._read_yaml_path("loop.pause.till", "00:00")
 
     def has_website_config(self):
-        """True if the flathunter website configuration is present"""
+        """True if the flathunter website configuration is present."""
         return "website" in self.config
 
     def website_session_key(self):
-        """Secret session key for the flathunter website"""
+        """Secret session key for the flathunter website."""
         return self._read_yaml_path("website.session_key", None)
 
     def website_domain(self):
-        """Domain that the flathunter website is hosted at"""
+        """Domain that the flathunter website is hosted at."""
         return self._read_yaml_path("website.domain", None)
 
     def website_bot_name(self):
-        """Name of the telegram bot used by the flathunter website to send messages"""
+        """Name of the telegram bot used by the flathunter website to send messages."""
         return self._read_yaml_path("website.bot_name", None)
 
     def google_cloud_project_id(self):
-        """Google Cloud project ID for App Engine / Cloud Run deployments"""
+        """Google Cloud project ID for App Engine / Cloud Run deployments."""
         return self._read_yaml_path("google_cloud_project_id", None)
 
     def message_format(self):
-        """Format of the message to send in user notifications"""
+        """Format of the message to send in user notifications."""
         config_format = self._read_yaml_path("message", None)
         if config_format is not None:
             return config_format
         return self.DEFAULT_MESSAGE_FORMAT
 
     def notifiers(self) -> list[str]:
-        """List of currently-active notifiers"""
+        """List of currently-active notifiers."""
         return self._read_yaml_path("notifiers", [])
 
     def telegram_bot_token(self) -> str | None:
-        """API Token to authenticate to the Telegram bot"""
+        """API Token to authenticate to the Telegram bot."""
         return self._read_yaml_path("telegram.bot_token", None)
 
     def telegram_notify_with_images(self) -> bool:
-        """True if images should be sent along with notifications"""
+        """True if images should be sent along with notifications."""
         flag = str(self._read_yaml_path(
             "telegram.notify_with_images", "false"))
         return flag.lower() == "true"
 
     def telegram_receiver_ids(self):
-        """Static list of receiver IDs for notification messages"""
+        """Static list of receiver IDs for notification messages."""
         return self._read_yaml_path("telegram.receiver_ids", [])
 
     def mattermost_webhook_url(self):
-        """Webhook for sending Mattermost messages"""
+        """Webhook for sending Mattermost messages."""
         return self._read_yaml_path("mattermost.webhook_url", None)
 
     def slack_webhook_url(self):
-        """Webhook for sending Slack messages"""
+        """Webhook for sending Slack messages."""
         return self._read_yaml_path("slack.webhook_url", "")
 
     def apprise_urls(self) -> list[str]:
-        """Notification URLs for Apprise"""
+        """Notification URLs for Apprise."""
         return self._read_yaml_path("apprise", [])
 
     def apprise_notify_with_images(self) -> bool:
-        """True if images should be sent along with notifications"""
+        """True if images should be sent along with notifications."""
         flag = str(self._read_yaml_path(
             "apprise_notify_with_images", "false"))
         return flag.lower() == "true"
 
     def apprise_image_limit(self) -> int | None:
-        """How many images should be sent along with Apprise notifications"""
+        """How many images should be sent along with Apprise notifications."""
         return self._read_yaml_path("apprise_image_limit", None)
 
     def _get_imagetyperz_token(self):
-        """API Token for Imagetyperz"""
+        """API Token for Imagetyperz."""
         return self._read_yaml_path("captcha.imagetyperz.token", "")
 
     def get_twocaptcha_key(self) -> str:
-        """API Token for 2captcha"""
+        """API Token for 2captcha."""
         return self._read_yaml_path("captcha.2captcha.api_key", "")
 
     def get_capmonster_key(self) -> str:
-        """API Token for Capmonster"""
+        """API Token for Capmonster."""
         return self._read_yaml_path("captcha.capmonster.api_key", "")
 
     def _get_captcha_solver(self) -> CaptchaSolver | None:
-        """Get configured captcha solver"""
+        """Get configured captcha solver."""
         imagetyperz_token = self._get_imagetyperz_token()
         if imagetyperz_token:
             return ImageTyperzSolver(imagetyperz_token)
@@ -333,66 +333,67 @@ Preis: {price}
         return None
 
     def get_captcha_solver(self) -> CaptchaSolver:
-        """Return the configured captcha solver (or raise exception)"""
+        """Return the configured captcha solver (or raise exception)."""
         solver = self._get_captcha_solver()
         if solver is not None:
             return solver
-        raise ConfigException("No captcha solver configured properly.")
+        msg = "No captcha solver configured properly."
+        raise ConfigException(msg)
 
     def captcha_driver_arguments(self):
-        """The list of driver arguments for Selenium / Webdriver"""
+        """The list of driver arguments for Selenium / Webdriver."""
         return self._read_yaml_path("captcha.driver_arguments", [])
 
     def use_proxy(self):
-        """Check if proxy is configured"""
+        """Check if proxy is configured."""
         return "use_proxy_list" in self.config and self.config["use_proxy_list"]
 
-    def set_keys(self, dict_keys: dict[str, Any]):
-        """Update the config keys based on the content of the dictionary passed"""
+    def set_keys(self, dict_keys: dict[str, Any]) -> None:
+        """Update the config keys based on the content of the dictionary passed."""
         self.config.update(dict_keys)
 
     def _get_filter_config(self, key: str) -> Any | None:
         return (self.config.get("filters", {}) or {}).get(key, None)
 
     def excluded_titles(self):
-        """Return the configured list of titles to exclude"""
+        """Return the configured list of titles to exclude."""
         if "excluded_titles" in self.config:
             return self.config["excluded_titles"]
         return self._get_filter_config("excluded_titles") or []
 
     def min_price(self):
-        """Return the configured minimum price"""
+        """Return the configured minimum price."""
         return self._get_filter_config("min_price")
 
     def max_price(self):
-        """Return the configured maximum price"""
+        """Return the configured maximum price."""
         return self._get_filter_config("max_price")
 
     def min_size(self):
-        """Return the configured minimum size"""
+        """Return the configured minimum size."""
         return self._get_filter_config("min_size")
 
     def max_size(self):
-        """Return the configured maximum size"""
+        """Return the configured maximum size."""
         return self._get_filter_config("max_size")
 
     def min_rooms(self):
-        """Return the configured minimum number of rooms"""
+        """Return the configured minimum number of rooms."""
         return self._get_filter_config("min_rooms")
 
     def max_rooms(self):
-        """Return the configured maximum number of rooms"""
+        """Return the configured maximum number of rooms."""
         return self._get_filter_config("max_rooms")
 
     def max_price_per_square(self):
-        """Return the configured maximum price per square meter"""
+        """Return the configured maximum price per square meter."""
         return self._get_filter_config("max_price_per_square")
 
     def immoscout_cookie(self):
-        """Return the precalculated immoscout cookie"""
+        """Return the precalculated immoscout cookie."""
         return self._read_yaml_path("immoscout_cookie", None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return json.dumps({
             "captcha_enabled": self.captcha_enabled(),
             "captcha_driver_arguments": self.captcha_driver_arguments(),
@@ -410,21 +411,21 @@ Preis: {price}
 
 
 class CaptchaEnvironmentConfig(YamlConfig):
-    """Mixin to add environment-variable captcha support to config object"""
+    """Mixin to add environment-variable captcha support to config object."""
 
     def _get_imagetyperz_token(self):
         return Env.FLATHUNTER_IMAGETYPERZ_TOKEN() or super()._get_imagetyperz_token()  # pylint: disable=no-member
 
     def get_twocaptcha_key(self) -> str:
-        """Return the currently configured 2captcha API key"""
+        """Return the currently configured 2captcha API key."""
         return Env.FLATHUNTER_2CAPTCHA_KEY() or super().get_twocaptcha_key()  # pylint: disable=no-member
 
     def get_capmonster_key(self) -> str:
-        """Return the currently configured Capmonster API key"""
+        """Return the currently configured Capmonster API key."""
         return Env.FLATHUNTER_CAPMONSTER_KEY() or super().get_capmonster_key()
 
     def captcha_driver_arguments(self):
-        """The list of driver arguments for Selenium / Webdriver"""
+        """The list of driver arguments for Selenium / Webdriver."""
         if Env.FLATHUNTER_HEADLESS_BROWSER() is not None:
             return [
                 "--no-sandbox",
@@ -439,17 +440,19 @@ class CaptchaEnvironmentConfig(YamlConfig):
 
 class Config(CaptchaEnvironmentConfig):  # pylint: disable=too-many-public-methods
     """Class to represent flathunter configuration, built from a file, supporting
-    environment variable overrides
+    environment variable overrides.
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None) -> None:
         if filename is None and Env.FLATHUNTER_TARGET_URLS() is None:
+            msg = "Config file loaction must be specified, or FLATHUNTER_TARGET_URLS must be set"
             raise ConfigException(
-                "Config file loaction must be specified, or FLATHUNTER_TARGET_URLS must be set")
+                msg)
         if filename is not None:
             logger.info("Using config path %s", filename)
             if not os.path.exists(filename):
-                raise ConfigException("No config file found at location %s")
+                msg = "No config file found at location %s"
+                raise ConfigException(msg)
             with open(filename, encoding="utf-8") as file:
                 config = yaml.safe_load(file)
         else:
@@ -457,7 +460,7 @@ class Config(CaptchaEnvironmentConfig):  # pylint: disable=too-many-public-metho
         super().__init__(config)
 
     def database_location(self):
-        """Return the location of the database folder"""
+        """Return the location of the database folder."""
         return Env.FLATHUNTER_DATABASE_LOCATION() or super().database_location()
 
     def target_urls(self):

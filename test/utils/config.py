@@ -1,18 +1,15 @@
-"""Wrap configuration options as an object"""
+"""Wrap configuration options as an object."""
 import yaml
 
 from flathunter.config import CaptchaEnvironmentConfig, YamlConfig
 
 
 class StringConfig(YamlConfig):
-    """Class to represent flathunter configuration for tests"""
+    """Class to represent flathunter configuration for tests."""
 
-    def __init__(self, string=None):
-        if string is not None:
-            config = yaml.safe_load(string)
-        else:
-            config = {}
+    def __init__(self, string=None) -> None:
+        config = yaml.safe_load(string) if string is not None else {}
         super().__init__(config)
 
 class StringConfigWithCaptchas(CaptchaEnvironmentConfig,StringConfig):
-    """Class to represent flathunter configuration for tests, with captcha support"""
+    """Class to represent flathunter configuration for tests, with captcha support."""

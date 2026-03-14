@@ -1,4 +1,4 @@
-"""Parser for some startup arguments"""
+"""Parser for some startup arguments."""
 
 import argparse
 import os
@@ -7,7 +7,7 @@ from flathunter.config import Env
 
 
 def parse():
-    """Processes and return command-line arguments"""
+    """Processes and return command-line arguments."""
     parser = argparse.ArgumentParser(
         description=("Searches for flats on Immobilienscout24.de and wg-gesucht.de"
                      " and sends results to Telegram User"),

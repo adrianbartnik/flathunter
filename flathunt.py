@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Flathunter - search for flats by crawling property portals, and receive telegram
 messages about them. This is the main command-line executable, for running on the
-console. To run as a webservice, look at main.py
+console. To run as a webservice, look at main.py.
 """
 
 import time
@@ -22,8 +22,8 @@ __email__ = "harrymcfly@protonmail.com"
 __status__ = "Production"
 
 
-def launch_flat_hunt(config, heartbeat: Heartbeat):
-    """Starts the crawler / notification loop"""
+def launch_flat_hunt(config, heartbeat: Heartbeat) -> None:
+    """Starts the crawler / notification loop."""
     id_watch = IdMaintainer(f"{config.database_location()}/processed_ids.db")
 
     time_from = dtime.fromisoformat(config.loop_pause_from())
@@ -48,15 +48,12 @@ def launch_flat_hunt(config, heartbeat: Heartbeat):
         hunter.hunt_flats()
 
 
-def main():
-    """Processes command-line arguments, loads the config, launches the flathunter"""
+def main() -> None:
+    """Processes command-line arguments, loads the config, launches the flathunter."""
     # load config
     args = parse()
     config_handle = args.config
-    if config_handle is not None:
-        config = Config(config_handle.name)
-    else:
-        config = Config()
+    config = Config(config_handle.name) if config_handle is not None else Config()
 
     # setup logging
     configure_logging(config)

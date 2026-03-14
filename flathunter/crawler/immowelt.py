@@ -1,4 +1,4 @@
-"""Expose crawler for ImmoWelt"""
+"""Expose crawler for ImmoWelt."""
 import datetime
 import hashlib
 import re
@@ -10,16 +10,16 @@ from flathunter.logging import logger
 
 
 class Immowelt(Crawler):
-    """Implementation of Crawler interface for ImmoWelt"""
+    """Implementation of Crawler interface for ImmoWelt."""
 
     URL_PATTERN = re.compile(r"https://www\.immowelt\.de")
 
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         super().__init__(config)
         self.config = config
 
     def get_expose_details(self, expose):
-        """Loads additional details for an expose by processing the expose detail URL"""
+        """Loads additional details for an expose by processing the expose detail URL."""
         soup = self.get_page(expose["url"])
         date = datetime.datetime.now().strftime("%2d.%2m.%Y")
         expose["from"] = date
@@ -48,7 +48,7 @@ class Immowelt(Crawler):
 
     # pylint: disable=too-many-locals
     def extract_data(self, raw_data: BeautifulSoup):
-        """Extracts all exposes from a provided Soup object"""
+        """Extracts all exposes from a provided Soup object."""
         entries = []
         soup_res = raw_data
         if not isinstance(soup_res, Tag):

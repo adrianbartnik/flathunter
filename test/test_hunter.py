@@ -1,6 +1,8 @@
 import re
 import unittest
 
+import pytest
+
 from flathunter.crawler.immowelt import Immowelt
 from flathunter.hunter import Hunter
 from flathunter.idmaintainer import IdMaintainer
@@ -110,121 +112,121 @@ excluded_titles:
   - "zwischenmiete"
 """
 
-    def test_hunt_flats(self):
+    def test_hunt_flats(self) -> None:
         config = StringConfig(string=self.DUMMY_CONFIG)
         config.set_searchers([Immowelt(config)])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 0, "Expected to find exposes")
+        assert count(exposes) > 0, "Expected to find exposes"
 
-    def test_invalid_config(self):
-        with self.assertRaises(Exception) as context:
-            Hunter(dict(), IdMaintainer(":memory:"))  # type: ignore
+    def test_invalid_config(self) -> None:
+        with pytest.raises(Exception) as context:
+            Hunter({}, IdMaintainer(":memory:"))  # type: ignore
 
-        self.assertTrue("Invalid config" in str(context.exception))
+        assert "Invalid config" in str(context.value)
 
-    def test_filter_titles_legacy(self):
+    def test_filter_titles_legacy(self) -> None:
         titlewords = [ "wg", "tausch", "flat", "ruhig", "gruen" ]
         filteredwords = [ "wg", "tausch", "wochenendheimfahrer", "pendler", "zwischenmiete" ]
         config = StringConfig(string=self.FILTER_TITLES_LEGACY_CONFIG)
         config.set_searchers([DummyCrawler(titlewords)])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = list(filter(lambda expose: any(word in expose["title"] for word in filteredwords), exposes))
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected words to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected words to be filtered"
 
-    def test_filter_titles(self):
+    def test_filter_titles(self) -> None:
         titlewords = [ "wg", "tausch", "flat", "ruhig", "gruen" ]
         filteredwords = [ "wg", "tausch", "wochenendheimfahrer", "pendler", "zwischenmiete" ]
         config = StringConfig(string=self.FILTER_TITLES_CONFIG)
         config.set_searchers([DummyCrawler(titlewords)])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = list(filter(lambda expose: any(word in expose["title"] for word in filteredwords), exposes))
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected words to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected words to be filtered"
 
-    def test_filter_min_price(self):
+    def test_filter_min_price(self) -> None:
         min_price = 700
         config = StringConfig(string=self.FILTER_MIN_PRICE_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_less_than(exposes, "price", min_price)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected cheap flats to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected cheap flats to be filtered"
 
-    def test_filter_max_price(self):
+    def test_filter_max_price(self) -> None:
         max_price = 1000
         config = StringConfig(string=self.FILTER_MAX_PRICE_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_greater_than(exposes, "price", max_price)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected expensive flats to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected expensive flats to be filtered"
 
-    def test_filter_max_size(self):
+    def test_filter_max_size(self) -> None:
         max_size = 80
         config = StringConfig(string=self.FILTER_MAX_SIZE_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_greater_than(exposes, "size", max_size)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected big flats to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected big flats to be filtered"
 
-    def test_filter_min_size(self):
+    def test_filter_min_size(self) -> None:
         min_size = 80
         config = StringConfig(string=self.FILTER_MIN_SIZE_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_less_than(exposes, "size", min_size)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected small flats to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected small flats to be filtered"
 
-    def test_filter_max_rooms(self):
+    def test_filter_max_rooms(self) -> None:
         max_rooms = 3
         config = StringConfig(string=self.FILTER_MAX_ROOMS_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_greater_than(exposes, "rooms", max_rooms)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected flats with too many rooms to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected flats with too many rooms to be filtered"
 
-    def test_filter_min_rooms(self):
+    def test_filter_min_rooms(self) -> None:
         min_rooms = 2
         config = StringConfig(string=self.FILTER_MIN_ROOMS_CONFIG)
         config.set_searchers([DummyCrawler()])
         hunter = Hunter(config, IdMaintainer(":memory:"))
         exposes = hunter.hunt_flats()
-        self.assertTrue(count(exposes) > 4, "Expected to find exposes")
+        assert count(exposes) > 4, "Expected to find exposes"
         unfiltered = filter_less_than(exposes, "rooms", min_rooms)
         if len(unfiltered) > 0:
-            for expose in unfiltered:
-                print("Got unfiltered expose: ", expose)
-        self.assertTrue(len(unfiltered) == 0, "Expected flats with too few rooms to be filtered")
+            for _expose in unfiltered:
+                print("Got unfiltered expose: ", _expose)
+        assert len(unfiltered) == 0, "Expected flats with too few rooms to be filtered"

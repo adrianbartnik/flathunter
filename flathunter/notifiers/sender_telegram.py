@@ -1,4 +1,4 @@
-"""Functions and classes related to sending Telegram messages"""
+"""Functions and classes related to sending Telegram messages."""
 import json
 import time
 
@@ -13,9 +13,9 @@ from flathunter.utils.list import chunk_list
 
 
 class SenderTelegram(Processor, Notifier):
-    """Expose processor that sends Telegram messages"""
+    """Expose processor that sends Telegram messages."""
 
-    def __init__(self, config: YamlConfig, receivers=None):
+    def __init__(self, config: YamlConfig, receivers=None) -> None:
         self.config = config
         self.bot_token = self.config.telegram_bot_token()
         self.__notify_with_images: bool = self.config.telegram_notify_with_images()
@@ -29,7 +29,7 @@ class SenderTelegram(Processor, Notifier):
             self.receiver_ids = receivers
 
     def process_expose(self, expose):
-        """Send a message to a user describing the expose"""
+        """Send a message to a user describing the expose."""
         self.__broadcast(
             receivers=self.receiver_ids,
             message=self.__get_text_message(expose),
@@ -45,7 +45,7 @@ class SenderTelegram(Processor, Notifier):
         :param receivers: list of user/group ids
         :param message: text message to send to users
         :param images: images to send to users as a reply to message
-        :return: None
+        :return: None.
         """
         for receiver in receivers:
             msg = self.__send_text(receiver, message)
@@ -55,10 +55,10 @@ class SenderTelegram(Processor, Notifier):
             if self.__notify_with_images and images:
                 self.__send_images(chat_id=receiver, msg=msg, images=images)
 
-    def notify(self, message: str):
+    def notify(self, message: str) -> None:
         """Send messages to each of the receivers in receiver_ids
         :param message: a message that should be sent to users
-        :return: None
+        :return: None.
         """
         self.__broadcast(self.receiver_ids, message, None)
 
@@ -67,7 +67,7 @@ class SenderTelegram(Processor, Notifier):
         heartbeat message or an apartment information
         :param chat_id: the receiver id
         :param message: the body of the message
-        :return: sent message information
+        :return: sent message information.
         """
         payload = {
             "chat_id": str(chat_id),
@@ -88,13 +88,13 @@ class SenderTelegram(Processor, Notifier):
 
         return response.json().get("result", {})
 
-    def __send_images(self, chat_id: int, msg: dict, images: list[str]):
+    def __send_images(self, chat_id: int, msg: dict, images: list[str]) -> None:
         """Send image to given user id (receiver).
         If msg is not None, it will send the images as a response to given message
         :param chat_id: the user/group that will receive the image
         :param msg: message that will be replied to
         :param images: list of urls
-        :return: None
+        :return: None.
         """
         # maximum number of images in a media group is 10.
         # if there are more than 10 images, we need to divide it into multiple messages.
@@ -124,7 +124,7 @@ class SenderTelegram(Processor, Notifier):
         :param msg: the message for logging
         :param response: the response that is received form the API
         :param chat_id: the receiver that was supposed to get the message
-        :return: None
+        :return: None.
 
         :raise BotBlockedException: Happens when bot trys to send a message to a user that
             has already blocked the bot
@@ -138,9 +138,11 @@ class SenderTelegram(Processor, Notifier):
 
         if response.status_code == 403:
             if "bot was blocked by the user" in data.get("description", ""):
-                raise BotBlockedException(f"User {chat_id} blocked the bot")
+                msg = f"User {chat_id} blocked the bot"
+                raise BotBlockedException(msg)
             if "user is deactivated" in data.get("description", ""):
-                raise UserDeactivatedException(f"User {chat_id} has been deactivated")
+                msg = f"User {chat_id} has been deactivated"
+                raise UserDeactivatedException(msg)
         if response.status_code == 429:
             if "Too Many Requests" in data.get("description", ""):
                 backoff = data.get("parameters", {}).get("retry_after", 30)
@@ -154,7 +156,7 @@ class SenderTelegram(Processor, Notifier):
     def __get_text_message(self, expose: dict) -> str:
         """Build text message based on the exposed data
         :param expose: dictionary
-        :return: str
+        :return: str.
         """
         return self.config.message_format().format(
             crawler=expose.get("crawler", "N/A"),

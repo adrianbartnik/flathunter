@@ -1,4 +1,4 @@
-"""Captcha solver for 2Captcha Captcha Solving Service (https://2captcha.com)"""
+"""Captcha solver for 2Captcha Captcha Solving Service (https://2captcha.com)."""
 import json
 from time import sleep
 
@@ -17,10 +17,10 @@ from flathunter.logging import logger
 
 
 class TwoCaptchaSolver(CaptchaSolver):
-    """Implementation of Captcha solver for 2Captcha"""
+    """Implementation of Captcha solver for 2Captcha."""
 
     def solve_geetest(self, geetest: str, challenge: str, page_url: str) -> GeetestResponse:
-        """Solves GeeTest Captcha"""
+        """Solves GeeTest Captcha."""
         logger.info("Trying to solve geetest.")
         params = {
             "key": self.api_key,
@@ -58,8 +58,9 @@ class TwoCaptchaSolver(CaptchaSolver):
         captcha_script: str,
         page_url: str,
     ) -> AwsAwfResponse:
-        """Should be implemented at some point"""
-        raise NotImplementedError("AWS WAF captchas not supported for 2Captcha")
+        """Should be implemented at some point."""
+        msg = "AWS WAF captchas not supported for 2Captcha"
+        raise NotImplementedError(msg)
 
     @backoff.on_exception(**CaptchaSolver.backoff_options)
     def __submit_2captcha_request(self, params: dict[str, str]) -> str:
@@ -93,11 +94,11 @@ class TwoCaptchaSolver(CaptchaSolver):
 
             if "ERROR_CAPTCHA_UNSOLVABLE" in retrieve_response.text:
                 logger.info("The captcha was unsolvable.")
-                raise CaptchaUnsolvableError()
+                raise CaptchaUnsolvableError
 
             if "ERROR_ZERO_BALANCE" in retrieve_response.text:
                 logger.info("2captcha account out of credit - buy more captchas.")
-                raise CaptchaBalanceEmpty()
+                raise CaptchaBalanceEmpty
 
             if not retrieve_response.text.startswith("OK"):
                 raise requests.HTTPError(response=retrieve_response)

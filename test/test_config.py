@@ -46,7 +46,7 @@ filters:
     max_rooms: 5
 """
 
-    def test_loads_config(self):
+    def test_loads_config(self) -> None:
         created = False
         if not os.path.isfile("config.yaml"):
             config_file = open("config.yaml", "w")
@@ -55,37 +55,37 @@ filters:
             config_file.close()
             created = True
         config = Config("config.yaml")
-        self.assertTrue(len(config.get("urls") or []) > 0, "Expected URLs in config file")
+        assert len(config.get("urls") or []) > 0, "Expected URLs in config file"
         if created:
             os.remove("config.yaml")
 
-    def test_loads_config_at_file(self):
+    def test_loads_config_at_file(self) -> None:
        with tempfile.NamedTemporaryFile(mode="w+") as temp:
           temp.write(self.DUMMY_CONFIG)
           temp.flush()
           config = Config(temp.name)
-       self.assertTrue(len(config.get("urls") or []) > 0, "Expected URLs in config file")
+       assert len(config.get("urls") or []) > 0, "Expected URLs in config file"
 
-    def test_loads_config_from_string(self):
+    def test_loads_config_from_string(self) -> None:
        config = StringConfig(string=self.EMPTY_FILTERS_CONFIG)
-       self.assertIsNotNone(config)
+       assert config is not None
        my_filter = config.get_filter()
-       self.assertIsNotNone(my_filter)
+       assert my_filter is not None
 
-    def test_loads_legacy_config_from_string(self):
+    def test_loads_legacy_config_from_string(self) -> None:
        config = StringConfig(string=self.LEGACY_FILTERS_CONFIG)
-       self.assertIsNotNone(config)
+       assert config is not None
        my_filter = config.get_filter()
-       self.assertIsNotNone(my_filter)
-       self.assertTrue(len(my_filter.filters) > 0)
+       assert my_filter is not None
+       assert len(my_filter.filters) > 0
 
-    def test_loads_filters_config_from_string(self):
+    def test_loads_filters_config_from_string(self) -> None:
        config = StringConfig(string=self.FILTERS_CONFIG)
-       self.assertIsNotNone(config)
+       assert config is not None
        my_filter = config.get_filter()
-       self.assertIsNotNone(my_filter)
+       assert my_filter is not None
 
-    def test_defaults_fields(self):
+    def test_defaults_fields(self) -> None:
        config = StringConfig(string=self.FILTERS_CONFIG)
-       self.assertIsNotNone(config)
-       self.assertEqual(config.database_location(), os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + "/.."))
+       assert config is not None
+       assert config.database_location() == os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + "/..")

@@ -1,4 +1,4 @@
-"""Interface for webcrawlers. Crawler implementations should subclass this"""
+"""Interface for webcrawlers. Crawler implementations should subclass this."""
 import json
 import re
 from abc import ABC
@@ -23,7 +23,7 @@ from flathunter.logging import logger
 
 
 class Crawler(ABC):
-    """Defines the Crawler interface"""
+    """Defines the Crawler interface."""
 
     URL_PATTERN: re.Pattern
 
@@ -42,14 +42,14 @@ class Crawler(ABC):
         "Accept-Language": "en-US,en;q=0.9",
     }
 
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
         if config.captcha_enabled():
             self.captcha_solver = config.get_captcha_solver()
 
     # pylint: disable=unused-argument
     def get_page(self, search_url, driver=None, page_no=None) -> BeautifulSoup:
-        """Applies a page number to a formatted search URL and fetches the exposes at that page"""
+        """Applies a page number to a formatted search URL and fetches the exposes at that page."""
         return self.get_soup_from_url(search_url)
 
     @backoff.on_exception(wait_gen=backoff.constant,
@@ -61,7 +61,7 @@ class Crawler(ABC):
             driver: Any | None = None,
             checkbox: bool = False,
             afterlogin_string: str | None = None) -> BeautifulSoup:
-        """Creates a Soup object from the HTML at the provided URL"""
+        """Creates a Soup object from the HTML at the provided URL."""
         if self.config.use_proxy():
             return self.get_soup_with_proxy(url)
         if driver is not None:
@@ -86,7 +86,7 @@ class Crawler(ABC):
         return BeautifulSoup(resp.content, "lxml")
 
     def get_soup_with_proxy(self, url) -> BeautifulSoup:
-        """Will try proxies until it's possible to crawl and return a soup"""
+        """Will try proxies until it's possible to crawl and return a soup."""
         resolved = False
         resp = None
 
@@ -121,18 +121,19 @@ class Crawler(ABC):
                     logger.error("Some error occurred. Trying new proxy...")
 
         if not resp:
+            msg = "An error occurred while fetching proxies or content"
             raise ProxyException(
-                "An error occurred while fetching proxies or content")
+                msg)
 
         return BeautifulSoup(resp.content, "lxml")
 
     def extract_data(self, raw_data):
-        """Should be implemented in subclass"""
+        """Should be implemented in subclass."""
         raise NotImplementedError
 
     # pylint: disable=unused-argument
     def get_results(self, search_url, max_pages=None):
-        """Loads the exposes from the site, starting at the provided URL"""
+        """Loads the exposes from the site, starting at the provided URL."""
         logger.debug("Got search URL %s", search_url)
 
         # load first page
@@ -145,7 +146,7 @@ class Crawler(ABC):
         return entries
 
     def crawl(self, url, max_pages=None):
-        """Load as many exposes as possible from the provided URL"""
+        """Load as many exposes as possible from the provided URL."""
         if re.search(self.URL_PATTERN, url):
             try:
                 return self.get_results(url, max_pages)
@@ -156,18 +157,18 @@ class Crawler(ABC):
         return []
 
     def get_name(self):
-        """Returns the name of this crawler"""
+        """Returns the name of this crawler."""
         return type(self).__name__
 
     def get_expose_details(self, expose):
-        """Loads additional detalis for an expose. Should be implemented in the subclass"""
+        """Loads additional detalis for an expose. Should be implemented in the subclass."""
         return expose
 
     @backoff.on_exception(wait_gen=backoff.constant,
                           exception=CaptchaUnsolvableError,
                           max_tries=3)
-    def resolve_geetest(self, driver):
-        """Resolve GeeTest Captcha"""
+    def resolve_geetest(self, driver) -> None:
+        """Resolve GeeTest Captcha."""
         data = re.findall(
             'geetest_validate: obj.geetest_validate,\n.*?data: "(.*)"',
             driver.page_source,
@@ -197,8 +198,8 @@ class Crawler(ABC):
     @backoff.on_exception(wait_gen=backoff.constant,
                         exception=CaptchaUnsolvableError,
                         max_tries=3)
-    def resolve_awsawf(self, driver):
-        """Resolve AWS WAF Captcha"""
+    def resolve_awsawf(self, driver) -> None:
+        """Resolve AWS WAF Captcha."""
         # Intercept background network traffic via log sniffing
         sleep(2)
         logs = [json.loads(lr["message"])["message"] for lr in driver.get_log("performance")]
@@ -225,7 +226,8 @@ class Crawler(ABC):
                 context = response_json["state"]["payload"]
                 sitekey = response_json["key"]
         if context is None or iv is None:
-            raise CaptchaUnsolvableError("Unable to find captcha data in logs")
+            msg = "Unable to find captcha data in logs"
+            raise CaptchaUnsolvableError(msg)
 
         sitekey = re.findall(
             r"apiKey: \"(.*?)\"", driver.page_source)[0]
@@ -243,7 +245,8 @@ class Crawler(ABC):
             jsapi = match
 
         if challenge is None or jsapi is None:
-            raise CaptchaUnsolvableError("Unable to find challenge or JSApi value in page source")
+            msg = "Unable to find challenge or JSApi value in page source"
+            raise CaptchaUnsolvableError(msg)
 
         try:
             captcha = self.captcha_solver.solve_awswaf(
@@ -268,8 +271,8 @@ class Crawler(ABC):
     @backoff.on_exception(wait_gen=backoff.constant,
                           exception=CaptchaUnsolvableError,
                           max_tries=3)
-    def resolve_recaptcha(self, driver, checkbox: bool, afterlogin_string: str = ""):
-        """Resolve Captcha"""
+    def resolve_recaptcha(self, driver, checkbox: bool, afterlogin_string: str = "") -> None:
+        """Resolve Captcha."""
         iframe_present = self._wait_for_iframe(driver)
         if checkbox is False and afterlogin_string == "" and iframe_present:
             google_site_key = driver \
@@ -301,7 +304,7 @@ class Crawler(ABC):
             self._wait_for_captcha_resolution(
                 driver, checkbox, afterlogin_string)
 
-    def _clickcaptcha(self, driver, checkbox: bool):
+    def _clickcaptcha(self, driver, checkbox: bool) -> None:
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
         recaptcha_checkbox = driver.find_element_by_class_name(
             "recaptcha-checkbox-checkmark")
@@ -309,7 +312,7 @@ class Crawler(ABC):
         self._wait_for_captcha_resolution(driver, checkbox)
         driver.switch_to.default_content()
 
-    def _wait_for_captcha_resolution(self, driver, checkbox: bool, afterlogin_string=""):
+    def _wait_for_captcha_resolution(self, driver, checkbox: bool, afterlogin_string="") -> None:
         if checkbox:
             try:
                 WebDriverWait(driver, 120).until(
@@ -329,11 +332,10 @@ class Crawler(ABC):
                     "Selenium.Timeoutexception when waiting for captcha to disappear")
 
     def _wait_for_iframe(self, driver: Chrome):
-        """Wait for iFrame to appear"""
+        """Wait for iFrame to appear."""
         try:
-            iframe = WebDriverWait(driver, 10).until(EC.visibility_of_element_located(
+            return WebDriverWait(driver, 10).until(EC.visibility_of_element_located(
                 (By.CSS_SELECTOR, "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']")))
-            return iframe
         except NoSuchElementException:
             logger.info(
                 "No iframe found, therefore no chaptcha verification necessary")
@@ -343,8 +345,8 @@ class Crawler(ABC):
                 "Timeout waiting for iframe element - no captcha verification necessary?")
             return None
 
-    def _wait_until_iframe_disappears(self, driver: Chrome):
-        """Wait for iFrame to disappear"""
+    def _wait_until_iframe_disappears(self, driver: Chrome) -> None:
+        """Wait for iFrame to disappear."""
         try:
             WebDriverWait(driver, 10).until(EC.invisibility_of_element(
                 (By.CSS_SELECTOR, "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']")))
