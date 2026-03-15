@@ -4,6 +4,7 @@ the correct version number.
 """
 import re
 import subprocess
+import time
 from sys import platform
 
 import undetected_chromedriver as uc
@@ -17,17 +18,19 @@ WINDOWS_CHROME_REG_REGEXP = re.compile(r"\s*version\s*REG_SZ\s*(\d+)\..*")
 CHROME_BINARY_NAMES = ["google-chrome", "chromium", "chrome", "chromium-browser",
                        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
 
+
 def get_command_output(args) -> list[str]:
     """Run a command and return stdout."""
     try:
         with subprocess.Popen(args,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                    universal_newlines=True) as process:
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              universal_newlines=True) as process:
             if process.stdout is None:
                 return []
             return process.stdout.readlines()
     except FileNotFoundError:
         return []
+
 
 def get_chrome_version() -> int:
     """Determine the correct name for the chrome binary."""
@@ -56,10 +59,11 @@ def get_chrome_version() -> int:
         pass
     raise ChromeNotFound
 
+
 def get_chrome_driver(driver_arguments):
     """Configure Chrome WebDriver."""
     logger.info("Initializing Chrome WebDriver for crawler...")
-    chrome_options = uc.ChromeOptions() # pylint: disable=no-member
+    chrome_options = uc.ChromeOptions()  # pylint: disable=no-member
     if platform == "darwin":
         chrome_options.add_argument("--headless")
     if driver_arguments is not None:
@@ -68,7 +72,9 @@ def get_chrome_driver(driver_arguments):
     chrome_version = get_chrome_version()
     chrome_options.add_argument("--headless=new")
     chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-    driver = uc.Chrome(version_main=chrome_version, options=chrome_options) # pylint: disable=no-member
+    driver = uc.Chrome(version_main=chrome_version, options=chrome_options)  # pylint: disable=no-member
+
+    time.sleep(2)
 
     driver.execute_cdp_cmd(
         "Network.setUserAgentOverride",
@@ -79,7 +85,6 @@ def get_chrome_driver(driver_arguments):
         },
     )
 
-    driver.execute_cdp_cmd("Network.setBlockedURLs",
-        {"urls": ["https://api.geetest.com/get.*"]})
+    driver.execute_cdp_cmd("Network.setBlockedURLs", {"urls": ["https://api.geetest.com/get.*"]})
     driver.execute_cdp_cmd("Network.enable", {})
     return driver

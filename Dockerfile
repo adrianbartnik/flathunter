@@ -6,7 +6,7 @@ ARG PIP_NO_CACHE_DIR=1
 
 # Install Chromium
 RUN apt-get -y update
-RUN apt-get install -y chromium git
+RUN apt-get install -y chromium git --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 

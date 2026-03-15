@@ -48,7 +48,7 @@ class AlreadySeenFilter(AbstractFilter):
         self.id_watch = id_watch
 
     def is_interesting(self, expose) -> bool:
-        """Returns true if an expose should be kept in the pipeline."""
+        """Returns true if an exposé should be kept in the pipeline."""
         if not self.id_watch.is_processed(expose["id"]):
             self.id_watch.mark_processed(expose["id"])
             return True
