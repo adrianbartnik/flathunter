@@ -1,49 +1,33 @@
 USER=adrian
+HOST=nas
+TARGET_DIR=/volume3/docker/flathunters
 
-# Variables for the Server
-HOST_SERVER=server
-TARGET_DIR_SERVER=/home/adrian/flathunters
+DOCKER=/usr/local/bin/docker
+DOCKER_COMPOSE=/usr/local/bin/docker-compose
 
-# Variables for the NAS
-HOST_NAS=nas
-TARGET_DIR_NAS=/var/services/homes/adrian/flathunters
+EXCLUDES=--exclude '.git' --exclude '__pycache__' --exclude '.venv' --exclude '.idea' --exclude 'processed_ids.db'
 
-# Logic to switch target based on 'to' variable
-# Usage: make deploy (defaults to server)
-# Usage: make deploy to=nas
-ifeq ($(to),nas)
-    HOST := $(HOST_NAS)
-    TARGET_DIR := $(TARGET_DIR_NAS)
-    LOCATION_NAME := 🏠 NAS
-else
-    HOST := $(HOST_SERVER)
-    TARGET_DIR := $(TARGET_DIR_SERVER)
-    LOCATION_NAME := ☁️  SERVER
-endif
-
-EXCLUDES=--exclude '.git' --exclude '__pycache__' --exclude '.venv' --exclude '.idea'
-
-.PHONY: deploy push run logs stop
+.PHONY: push build run deploy logs stop
 
 # The "Do Everything" command
-deploy: push run
+deploy: push build run
 
-# Syncs local code to the target
 push:
-	@echo "🚀 Syncing code to $(LOCATION_NAME) ($(HOST))..."
+	@echo "🚀 Syncing code to NAS..."
 	rsync -avz $(EXCLUDES) ./ $(USER)@$(HOST):$(TARGET_DIR)
 
-# Builds and starts the container on the target
+build:
+	@echo "🚀 Building docker image on NAS..."
+	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && $(DOCKER) build . -t flathunters-app"
+
 run:
-	@echo "🏗️  Building and starting containers on $(LOCATION_NAME)..."
-	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && docker compose up -d --build"
+	@echo "🏗️  Starting container on NAS..."
+	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && $(DOCKER) compose up -d"
 
-# View logs on the target
 logs:
-	@echo "📋 Showing logs for $(LOCATION_NAME)..."
-	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && docker compose logs -f"
+	@echo "📋 Showing logs on NAS..."
+	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && $(DOCKER) compose logs -f"
 
-# Stop the service on the target
 stop:
-	@echo "🛑 Stopping service on $(LOCATION_NAME)..."
-	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && docker compose down"
+	@echo "🛑 Stopping service on NAS..."
+	ssh $(USER)@$(HOST) "cd $(TARGET_DIR) && $(DOCKER) compose down"
