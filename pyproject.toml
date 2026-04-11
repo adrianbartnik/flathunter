@@ -21,7 +21,6 @@ dependencies = [
     "beautifulsoup4",
     "webdriver-manager",
     "python-dotenv",
-    "undetected-chromedriver",
     "prompt-toolkit",
     "ruamel.yaml",
     "pyright",
@@ -34,6 +33,7 @@ dependencies = [
     "jinja2",
     "cryptography",
     "pydantic",
+    "nodriver>=0.48.1",
 ]
 
 [build-system]

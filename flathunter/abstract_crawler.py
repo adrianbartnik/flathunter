@@ -47,8 +47,7 @@ class Crawler(ABC):
         if config.captcha_enabled():
             self.captcha_solver = config.get_captcha_solver()
 
-    # pylint: disable=unused-argument
-    def get_page(self, search_url, driver=None, page_no=None) -> BeautifulSoup:
+    def get_page(self, search_url) -> BeautifulSoup:
         """Applies a page number to a formatted search URL and fetches the exposes at that page."""
         return self.get_soup_from_url(search_url)
 

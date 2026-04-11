@@ -69,6 +69,10 @@ class SenderTelegram(Processor, Notifier):
         :param message: the body of the message
         :return: sent message information.
         """
+
+        logger.error("Sending bot text message: %s", message)
+        return {}
+
         payload = {
             "chat_id": str(chat_id),
             "text": message,

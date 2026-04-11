@@ -28,7 +28,7 @@ class Kleinanzeigen(WebdriverCrawler):
     }
 
     def get_expose_details(self, expose):
-        soup = self.get_page(expose["url"], self.get_driver())
+        soup = self.get_page(expose["url"])
         for detail in soup.find_all("li", {"class": "addetailslist--detail"}):
             if re.match(r"Verfügbar ab", detail.text):
                 date_string = re.match(r"(\w+) (\d{4})", detail.text)

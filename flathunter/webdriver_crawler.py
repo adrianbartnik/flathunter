@@ -1,10 +1,11 @@
-"""Expose crawler for Kleinanzeigen."""
+import asyncio
 
+import nodriver
 from bs4 import BeautifulSoup
-from selenium.webdriver import Chrome
+from nodriver.core.browser import Browser
+from nodriver.core.tab import Tab
 
 from flathunter.abstract_crawler import Crawler
-from flathunter.chrome_wrapper import get_chrome_driver
 from flathunter.exceptions import DriverLoadException
 
 
@@ -16,22 +17,24 @@ class WebdriverCrawler(Crawler):
         self.config = config
         self.driver = None
 
-    def get_driver(self) -> Chrome | None:
+    def get_driver(self) -> Browser | None:
         """Lazy method to fetch the driver as required at runtime."""
         if self.driver is not None:
             return self.driver
-        driver_arguments = self.config.captcha_driver_arguments()
-        self.driver = get_chrome_driver(driver_arguments)
+
+        browser: Browser = asyncio.run(nodriver.start(headless=True))
+
+        self.driver = browser
         return self.driver
 
-    def get_driver_force(self) -> Chrome:
+    def get_driver_force(self) -> Browser:
         """Fetch the driver, and throw an exception if it is not configured or available."""
         res = self.get_driver()
         if res is None:
             msg = "Unable to load chrome driver when expected"
             raise DriverLoadException(msg)
+
         return res
 
-    def get_page(self, search_url, driver=None, page_no=None) -> BeautifulSoup:
-        """Applies a page number to a formatted search URL and fetches the exposes at that page."""
-        return self.get_soup_from_url(search_url, driver=self.get_driver())
+    def get_page(self, search_url) -> Tab:
+        return asyncio.run(self.get_driver_force().get(search_url))
