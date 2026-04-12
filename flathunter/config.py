@@ -341,7 +341,7 @@ Preis: {price}
         raise ConfigException(msg)
 
     def captcha_driver_arguments(self):
-        """The list of driver arguments for Selenium / Webdriver."""
+        """The list of driver arguments for the Chrome browser."""
         return self._read_yaml_path("captcha.driver_arguments", [])
 
     def use_proxy(self):
@@ -425,7 +425,7 @@ class CaptchaEnvironmentConfig(YamlConfig):
         return Env.FLATHUNTER_CAPMONSTER_KEY() or super().get_capmonster_key()
 
     def captcha_driver_arguments(self):
-        """The list of driver arguments for Selenium / Webdriver."""
+        """The list of driver arguments for the Chrome browser."""
         if Env.FLATHUNTER_HEADLESS_BROWSER() is not None:
             return [
                 "--no-sandbox",

@@ -5,10 +5,10 @@ import re
 from bs4 import Tag
 
 from flathunter.logging import logger
-from flathunter.webdriver_crawler import WebdriverCrawler
+from flathunter.browser_crawler import BrowserCrawler
 
 
-class Kleinanzeigen(WebdriverCrawler):
+class Kleinanzeigen(BrowserCrawler):
     """Implementation of Crawler interface for Kleinanzeigen."""
 
     URL_PATTERN = re.compile(r"https://www\.kleinanzeigen\.de")

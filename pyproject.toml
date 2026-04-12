@@ -19,14 +19,12 @@ dependencies = [
     "backoff",
     "pytz",
     "beautifulsoup4",
-    "webdriver-manager",
     "python-dotenv",
-    "undetected-chromedriver",
+    "nodriver",
     "prompt-toolkit",
     "ruamel.yaml",
     "pyright",
     "types-beautifulsoup4==4.12.0.20241020",
-    "selenium==4.27.1",
     "gunicorn==23.0.0",
     "flask-api",
     "setuptools",
@@ -56,6 +54,7 @@ url = "https://pypi.python.org/simple"
 
 [tool.uv.sources]
 flask-api = { git = "git+https://github.com/flask-api/flask-api.git", rev = "develop" }
+nodriver = { git = "https://github.com/ultrafunkamsterdam/nodriver.git", rev = "adc0da8" }
 
 [tool.setuptools]
 include-package-data = false

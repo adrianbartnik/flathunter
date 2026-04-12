@@ -10,11 +10,6 @@ import requests
 
 # pylint: disable=unused-import
 from bs4 import BeautifulSoup
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver import Chrome
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
 
 from flathunter import proxies
 from flathunter.captcha.captcha_solver import CaptchaUnsolvableError
@@ -53,7 +48,7 @@ class Crawler(ABC):
         return self.get_soup_from_url(search_url)
 
     @backoff.on_exception(wait_gen=backoff.constant,
-                          exception=TimeoutException,
+                          exception=TimeoutError,
                           max_tries=3)
     def get_soup_from_url(
             self,
@@ -200,28 +195,14 @@ class Crawler(ABC):
                         max_tries=3)
     def resolve_awsawf(self, driver) -> None:
         """Resolve AWS WAF Captcha."""
-        # Intercept background network traffic via log sniffing
         sleep(2)
-        logs = [json.loads(lr["message"])["message"] for lr in driver.get_log("performance")]
-
-        def log_filter(log_):
-            return (
-                # is an actual response
-                log_["method"] == "Network.responseReceived"
-                # and json
-                and "json" in log_["params"]["response"]["mimeType"]
-            )
 
         context = None
         iv = None
-        for log in filter(log_filter, logs):
-            request_id = log["params"]["requestId"]
-            resp_url = log["params"]["response"]["url"]
-            if "problem" in resp_url and "awswaf" in resp_url:
-                response = driver.execute_cdp_cmd(
-                    "Network.getResponseBody", {"requestId": request_id},
-                )
-                response_json = json.loads(response["body"])
+        for resp in driver.get_json_responses():
+            if "problem" in resp["url"] and "awswaf" in resp["url"]:
+                body = driver.get_response_body(resp["request_id"])
+                response_json = json.loads(body)
                 iv = response_json["state"]["iv"]
                 context = response_json["state"]["payload"]
                 sitekey = response_json["key"]
@@ -275,9 +256,8 @@ class Crawler(ABC):
         """Resolve Captcha."""
         iframe_present = self._wait_for_iframe(driver)
         if checkbox is False and afterlogin_string == "" and iframe_present:
-            google_site_key = driver \
-                .find_element_by_class_name("g-recaptcha") \
-                .get_attribute("data-sitekey")
+            google_site_key = driver.get_element_attribute(
+                ".g-recaptcha", "data-sitekey")
 
             try:
                 captcha_result = self.captcha_solver.solve_recaptcha(
@@ -305,50 +285,32 @@ class Crawler(ABC):
                 driver, checkbox, afterlogin_string)
 
     def _clickcaptcha(self, driver, checkbox: bool) -> None:
-        driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
-        recaptcha_checkbox = driver.find_element_by_class_name(
-            "recaptcha-checkbox-checkmark")
-        recaptcha_checkbox.click()
+        driver.click_in_frame(".recaptcha-checkbox-checkmark")
         self._wait_for_captcha_resolution(driver, checkbox)
-        driver.switch_to.default_content()
 
     def _wait_for_captcha_resolution(self, driver, checkbox: bool, afterlogin_string="") -> None:
         if checkbox:
-            try:
-                WebDriverWait(driver, 120).until(
-                    EC.visibility_of_element_located(
-                        (By.CLASS_NAME, "recaptcha-checkbox-checked")),
-                )
-            except TimeoutException:
+            if not driver.wait_for_element_in_frame(
+                    ".recaptcha-checkbox-checked", timeout=120):
                 logger.warning(
-                    "Selenium.Timeoutexception when waiting for captcha to appear")
-        else:
-            xpath_string = f"//*[contains(text(), '{afterlogin_string}')]"
-            try:
-                WebDriverWait(driver, 120) \
-                    .until(EC.visibility_of_element_located((By.XPATH, xpath_string)))
-            except TimeoutException:
+                    "Timeout when waiting for captcha checkbox to be checked")
+        elif afterlogin_string:
+            if not driver.wait_for_text(afterlogin_string, timeout=120):
                 logger.warning(
-                    "Selenium.Timeoutexception when waiting for captcha to disappear")
+                    "Timeout when waiting for captcha to disappear")
 
-    def _wait_for_iframe(self, driver: Chrome):
+    def _wait_for_iframe(self, driver) -> bool:
         """Wait for iFrame to appear."""
-        try:
-            return WebDriverWait(driver, 10).until(EC.visibility_of_element_located(
-                (By.CSS_SELECTOR, "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']")))
-        except NoSuchElementException:
+        found = driver.wait_for_element(
+            "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']",
+            timeout=10)
+        if not found:
             logger.info(
-                "No iframe found, therefore no chaptcha verification necessary")
-            return None
-        except TimeoutException:
-            logger.info(
-                "Timeout waiting for iframe element - no captcha verification necessary?")
-            return None
+                "No iframe found, therefore no captcha verification necessary")
+        return found
 
-    def _wait_until_iframe_disappears(self, driver: Chrome) -> None:
+    def _wait_until_iframe_disappears(self, driver) -> None:
         """Wait for iFrame to disappear."""
-        try:
-            WebDriverWait(driver, 10).until(EC.invisibility_of_element(
-                (By.CSS_SELECTOR, "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']")))
-        except NoSuchElementException:
-            logger.warning("Element not found")
+        driver.wait_for_element_invisible(
+            "iframe[src^='https://www.google.com/recaptcha/api2/anchor?']",
+            timeout=10)
