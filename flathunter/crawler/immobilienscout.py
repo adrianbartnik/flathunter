@@ -91,6 +91,27 @@ class Immobilienscout(Crawler):
             timeout=30,
         )
 
+    def get_expose_details(self, expose):
+        """Loads additional details for an expose from the mobile API."""
+        expose_id = str(expose["id"])
+        try:
+            resp = requests.get(
+                f"https://api.mobile.immobilienscout24.de/expose/{expose_id}",
+                headers=self.HEADERS,
+                timeout=30,
+            )
+            if resp.status_code != 200:
+                return expose
+            data = resp.json()
+            for section in data.get("sections", []):
+                if section.get("type") == "TEXT_AREA" and section.get("title") == "Objektbeschreibung":
+                    expose["description"] = section.get("text", "").strip()
+                if section.get("type") == "TEXT_AREA" and section.get("title") == "Sonstiges":
+                    expose["other_description"] = section.get("text", "").strip()
+        except Exception:
+            logger.warning("Failed to fetch expose details for %s", expose_id)
+        return expose
+
     def extract_data(self, raw_data: dict) -> list:
         """Extracts all exposes from a JSON dictionary."""
         entries = []

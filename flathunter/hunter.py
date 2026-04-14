@@ -25,6 +25,7 @@ class Hunter:
 
     def crawl_for_exposes(self, max_pages=None):
         """Trigger a new crawl of the configured URLs."""
+
         def try_crawl(searcher, url, max_pages):
             try:
                 return searcher.crawl(url, max_pages)
@@ -39,20 +40,21 @@ class Hunter:
                        for searcher in self.config.searchers()
                        for url in self.config.target_urls()])
 
-    def hunt_flats(self, max_pages: None|int = None):
+    def hunt_flats(self, max_pages: None | int = None):
         """Crawl, process and filter exposes."""
         filter_set = Filter.builder() \
-                           .read_config(self.config) \
-                           .filter_already_seen(self.id_watch) \
-                           .build()
+            .read_config(self.config) \
+            .filter_already_seen(self.id_watch) \
+            .build()
 
         processor_chain = ProcessorChain.builder(self.config) \
-                                        .save_all_exposes(self.id_watch) \
-                                        .apply_filter(filter_set) \
-                                        .resolve_addresses() \
-                                        .calculate_durations() \
-                                        .send_messages() \
-                                        .build()
+            .save_all_exposes(self.id_watch) \
+            .apply_filter(filter_set) \
+            .crawl_expose_details() \
+            .resolve_addresses() \
+            .calculate_durations() \
+            .send_messages() \
+            .build()
 
         result = []
         # We need to iterate over this list to force the evaluation of the pipeline

@@ -156,7 +156,7 @@ class Crawler(ABC):
         return type(self).__name__
 
     def get_expose_details(self, expose):
-        """Loads additional detalis for an expose. Should be implemented in the subclass."""
+        """Loads additional details for an expose. Should be implemented in the subclass."""
         return expose
 
     @backoff.on_exception(wait_gen=backoff.constant,

@@ -167,4 +167,5 @@ class SenderTelegram(Processor, Notifier):
             url=expose.get("url", "N/A"),
             address=expose.get("address", "N/A"),
             durations=expose.get("durations", "N/A"),
+            description=expose.get("description", "N/A"),
         ).strip()

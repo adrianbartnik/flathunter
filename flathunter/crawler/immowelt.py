@@ -25,6 +25,11 @@ class Immowelt(BrowserCrawler):
         date = datetime.datetime.now().strftime("%2d.%2m.%Y")
         expose["from"] = date
 
+        description_div = soup.find(
+            "div", attrs={"data-testid": "aviv.CDP.Sections.Description"})
+        if isinstance(description_div, Tag):
+            expose["description"] = description_div.text.strip()
+
         immo_div = soup.find("app-estate-object-informations")
         if not isinstance(immo_div, Tag):
             return expose

@@ -36,6 +36,9 @@ class Kleinanzeigen(BrowserCrawler):
                     expose["from"] = "01." + self.MONTHS[date_string[1]] + "." + date_string[2]
         if "from" not in expose:
             expose["from"] = datetime.datetime.now().strftime("%02d.%02m.%Y")
+        description_el = soup.find("p", id="viewad-description-text")
+        if isinstance(description_el, Tag):
+            expose["description"] = description_el.text.strip()
         return expose
 
     # pylint: disable=too-many-locals

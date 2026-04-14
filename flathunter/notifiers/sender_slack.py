@@ -25,7 +25,8 @@ class SenderSlack(Processor, Notifier):
             price=expose["price"],
             url=expose["url"],
             address=expose["address"],
-            durations=expose.get("durations", "")).strip()
+            durations=expose.get("durations", ""),
+            description=expose.get("description", "")).strip()
         self.notify(message)
         return expose
 
